@@ -6,8 +6,8 @@ After:
 Injector:
   # Define the default adapter for this filesystem
   FlysystemPublicAdapter:
-    class: 'SilverStripeS3\SilverStripeAwsS3Adapter_Public'
+    class: 'Madmatt\SilverStripeS3\SilverStripeAwsS3Adapter_Public'
 
   # Define the secondary adapter for protected assets
   FlysystemProtectedAdapter:
-    class: 'SilverStripeS3\SilverStripeAwsS3Adapter_Protected'
+    class: 'Madmatt\SilverStripeS3\SilverStripeAwsS3Adapter_Protected'
