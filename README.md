@@ -12,3 +12,7 @@ The module requires a few environment variables to be set. Full details can be s
 * `SS_AWS_S3_SECRET`: Your AWS secret corresponding to the access key
 * `SS_AWS_S3_REGION`: The AWS region your S3 bucket is hosted in (e.g. `eu-central-1`)
 * `SS_AWS_S3_BUCKET_NAME`: The name of the S3 bucket to store assets in.
+
+## Installation
+
+For now, just use `composer require madmatt/silverstripe-s3 dev-master`. You'll need to add `"minimum-stability": "dev"` to your composer.json as there's no stable versions released yet.
