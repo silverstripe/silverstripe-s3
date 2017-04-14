@@ -20,3 +20,9 @@ The module requires a few environment variables to be set. Full details can be s
 * Run `composer require madmatt/silverstripe-s3`
 
 This will install the most recent applicable version of the module given your other Composer requirements.
+
+**Note:** This currently immediately replaces the built-in local asset store that comes with SilverStripe with one based on S3. Any files that had previously been uploaded to an existing asset store will be unavailable (though they won't be lost - just run `composer remove madmatt/silverstripe-s3` to remove the module and restore access).
+
+## Uninstalling
+
+* Run `composer remove madmatt/silverstripe-s3` to remove the module.
