@@ -1,5 +1,6 @@
 {
 	"name": "madmatt/silverstripe-s3",
+	"type": "silverstripe-module",
 	"description": "Adds SilverStripe support for using the S3 adapter for Flysystem",
 
 	"require": {
@@ -17,5 +18,9 @@
 		"psr-4": {
 			"Madmatt\\SilverStripeS3\\": "src/"
 		}
+	},
+
+	"extra": {
+		"installer-name": "s3"
 	}
 }
