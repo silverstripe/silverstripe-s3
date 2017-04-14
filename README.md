@@ -15,4 +15,8 @@ The module requires a few environment variables to be set. Full details can be s
 
 ## Installation
 
-For now, just use `composer require madmatt/silverstripe-s3 dev-master`, then define the environment variables listed above. You'll need to add `"minimum-stability": "dev"` to your composer.json as there's no stable versions released yet.
+* Define the environment variables listed above.
+* [Install Composer from https://getcomposer.org](https://getcomposer.org/download/)
+* Run `composer require madmatt/silverstripe-s3`
+
+This will install the most recent applicable version of the module given your other Composer requirements.
