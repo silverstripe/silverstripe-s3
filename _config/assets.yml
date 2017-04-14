@@ -1,13 +1,10 @@
 ---
 Name: silverstripes3
 After:
-  - '#coreflysystem'
+  - '#assetsflysystem'
 ---
-Injector:
-  # Define the default adapter for this filesystem
+SilverStripe\Core\Injector\Injector:
   FlysystemPublicAdapter:
-    class: 'Madmatt\SilverStripeS3\SilverStripeAwsS3Adapter_Public'
-
-  # Define the secondary adapter for protected assets
+    class: 'Madmatt\SilverStripeS3\SilverStripeS3PublicAdapter'
   FlysystemProtectedAdapter:
-    class: 'Madmatt\SilverStripeS3\SilverStripeAwsS3Adapter_Protected'
+    class: 'Madmatt\SilverStripeS3\SilverStripeS3ProtectedAdapter'
