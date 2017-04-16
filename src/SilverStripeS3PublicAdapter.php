@@ -7,7 +7,7 @@ use Aws\S3\S3Client,
     SilverStripe\Assets\Flysystem\PublicAdapter;
 
 class SilverStripeS3PublicAdapter extends AwsS3Adapter implements PublicAdapter {
-    use \SilverStripeS3AdapterTrait;
+    use SilverStripeS3AdapterTrait;
 
     public function __construct() {
         $s3Client = new S3Client([
@@ -22,6 +22,13 @@ class SilverStripeS3PublicAdapter extends AwsS3Adapter implements PublicAdapter 
         parent::__construct($s3Client, $this->findAwsBucket(), 'public');
     }
 
+    /**
+     * Used to get the public URL to a file in an S3 bucket. The standard S3 URL is returned (the file is not proxied
+     * further via SilverStripe).
+     *
+     * @param string $path
+     * @return string
+     */
     public function getPublicUrl($path) {
         return $this->getClient()->getObjectUrl($this->getBucket(), $this->applyPathPrefix($path));
     }

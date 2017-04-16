@@ -1,4 +1,7 @@
 <?php
+
+namespace Madmatt\SilverStripeS3;
+
 /**
  * Class SilverStripeAwsS3Adapter_Trait
  * @package Madmatt\SilverStripeS3
