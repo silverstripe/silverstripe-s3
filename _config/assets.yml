@@ -4,7 +4,7 @@ After:
   - '#assetsflysystem'
 ---
 SilverStripe\Core\Injector\Injector:
-  FlysystemPublicAdapter:
+  SilverStripe\Assets\Flysystem\PublicAdapter:
     class: 'Madmatt\SilverStripeS3\SilverStripeS3PublicAdapter'
-  FlysystemProtectedAdapter:
+  SilverStripe\Assets\Flysystem\ProtectedAdapter:
     class: 'Madmatt\SilverStripeS3\SilverStripeS3ProtectedAdapter'
