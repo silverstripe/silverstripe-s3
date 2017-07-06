@@ -4,7 +4,15 @@ After:
   - '#assetsflysystem'
 ---
 SilverStripe\Core\Injector\Injector:
+  Aws\S3\S3Client.public:
+    factory: Madmatt\SilverStripeS3\S3ClientFactory
+  Aws\S3\S3Client.protected:
+    factory: Madmatt\SilverStripeS3\S3ClientFactory
   SilverStripe\Assets\Flysystem\PublicAdapter:
-    class: 'Madmatt\SilverStripeS3\SilverStripeS3PublicAdapter'
+    class: Madmatt\SilverStripeS3\SilverStripeS3PublicAdapter
+    constructor:
+      s3client: %$Aws\S3\S3Client.public
   SilverStripe\Assets\Flysystem\ProtectedAdapter:
-    class: 'Madmatt\SilverStripeS3\SilverStripeS3ProtectedAdapter'
+    class: Madmatt\SilverStripeS3\SilverStripeS3ProtectedAdapter
+    constructor:
+      s3client: %$Aws\S3\S3Client.protected

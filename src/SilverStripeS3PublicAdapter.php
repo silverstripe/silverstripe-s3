@@ -10,17 +10,8 @@ class SilverStripeS3PublicAdapter extends AwsS3Adapter implements PublicAdapter
 {
     use SilverStripeS3AdapterTrait;
 
-    public function __construct()
+    public function __construct(S3Client $s3Client)
     {
-        $s3Client = new S3Client([
-            'credentials' => [
-                'key' => $this->findAwsKey(),
-                'secret' => $this->findAwsSecret()
-            ],
-            'region' => $this->findAwsRegion(),
-            'version' => 'latest'
-        ]);
-
         parent::__construct($s3Client, $this->findAwsBucket(), 'public');
     }
 
