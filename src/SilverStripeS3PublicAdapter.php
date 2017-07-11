@@ -2,23 +2,16 @@
 
 namespace Madmatt\SilverStripeS3;
 
-use Aws\S3\S3Client,
-    League\Flysystem\AwsS3v3\AwsS3Adapter,
-    SilverStripe\Assets\Flysystem\PublicAdapter;
+use Aws\S3\S3Client;
+use League\Flysystem\AwsS3v3\AwsS3Adapter;
+use SilverStripe\Assets\Flysystem\PublicAdapter;
 
-class SilverStripeS3PublicAdapter extends AwsS3Adapter implements PublicAdapter {
+class SilverStripeS3PublicAdapter extends AwsS3Adapter implements PublicAdapter
+{
     use SilverStripeS3AdapterTrait;
 
-    public function __construct() {
-        $s3Client = new S3Client([
-            'credentials' => [
-                'key' => $this->findAwsKey(),
-                'secret' => $this->findAwsSecret()
-            ],
-            'region' => $this->findAwsRegion(),
-            'version' => 'latest'
-        ]);
-
+    public function __construct(S3Client $s3Client)
+    {
         parent::__construct($s3Client, $this->findAwsBucket(), 'public');
     }
 
@@ -29,7 +22,8 @@ class SilverStripeS3PublicAdapter extends AwsS3Adapter implements PublicAdapter 
      * @param string $path
      * @return string
      */
-    public function getPublicUrl($path) {
+    public function getPublicUrl($path)
+    {
         return $this->getClient()->getObjectUrl($this->getBucket(), $this->applyPathPrefix($path));
     }
 }
