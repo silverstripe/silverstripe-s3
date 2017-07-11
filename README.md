@@ -55,6 +55,8 @@ bucket policy may be useful.
 Make sure you replace `<bucket-name>` and `<your-ARN>` below with the appropriate values.
 `<your-ARN>` should match the IAM arn of the ec2 instance running your SilverStripe site.
 
+**Note:** The below policy has not been extensively tested - feedback welcome.
+
 ```
 {
     "Version": "2012-10-17",
@@ -71,7 +73,7 @@ Make sure you replace `<bucket-name>` and `<your-ARN>` below with the appropriat
             "Sid": "ServerFullAccess",
             "Effect": "Allow",
             "Principal": {"AWS":"<your-ARN>"},
-            "Action": "*",
+            "Action": ["s3:GetObject", "s3:DeleteObject", "s3:PutObject"],
             "Resource": "arn:aws:s3:::<bucket-name>/*"
         }
     ]
