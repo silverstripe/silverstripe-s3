@@ -11,13 +11,13 @@ using AWS bucket policy.
 The module requires a few environment variables to be set. Full details can
 be seen in the `SilverStripeS3AdapterTrait` trait. These are mandatory.
 
-* `SS_AWS_S3_REGION`: The AWS region your S3 bucket is hosted in (e.g. `eu-central-1`)
-* `SS_AWS_S3_BUCKET_NAME`: The name of the S3 bucket to store assets in.
+* `AWS_REGION`: The AWS region your S3 bucket is hosted in (e.g. `eu-central-1`)
+* `AWS_BUCKET_NAME`: The name of the S3 bucket to store assets in.
 
 If running outside of an EC2 instance it will be necessary to specify an API key and secret.
 
-* `SS_AWS_S3_KEY`: Your AWS access key that has access to the bucket you want to access
-* `SS_AWS_S3_SECRET`: Your AWS secret corresponding to the access key
+* `AWS_ACCESS_KEY_ID`: Your AWS access key that has access to the bucket you want to access
+* `AWS_SECRET_ACCESS_KEY`: Your AWS secret corresponding to the access key
 
 ## Installation
 
