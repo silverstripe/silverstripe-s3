@@ -12,7 +12,19 @@ class SilverStripeS3PublicAdapter extends AwsS3Adapter implements PublicAdapter
 
     public function __construct(S3Client $s3Client)
     {
-        parent::__construct($s3Client, $this->findAwsBucket(), 'public');
+        parent::__construct($s3Client, $this->findAwsBucket(), $this->findBucketPrefix());
+    }
+
+    /**
+     * @return string
+     */
+    public function findBucketPrefix()
+    {
+        $prefix = 'public';
+        if (getenv('AWS_PUBLIC_BUCKET_PREFIX') !== false) {
+            $prefix = (string) getenv('AWS_PUBLIC_BUCKET_PREFIX');
+        }
+        return $prefix;
     }
 
     /**

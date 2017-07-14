@@ -18,7 +18,19 @@ class SilverStripeS3ProtectedAdapter extends AwsS3Adapter implements ProtectedAd
 
     public function __construct(S3Client $s3Client)
     {
-        parent::__construct($s3Client, $this->findAwsBucket(), 'protected');
+        parent::__construct($s3Client, $this->findAwsBucket(), $this->findBucketPrefix());
+    }
+
+    /**
+     * @return string
+     */
+    public function findBucketPrefix()
+    {
+        $prefix = 'protected';
+        if (getenv('AWS_PROTECTED_BUCKET_PREFIX') !== false) {
+            $prefix = (string) getenv('AWS_PROTECTED_BUCKET_PREFIX');
+        }
+        return $prefix;
     }
 
     /**
