@@ -16,14 +16,12 @@ trait SilverStripeS3AdapterTrait
      */
     public function findAwsBucket()
     {
-        if (getenv('SS_AWS_S3_BUCKET_NAME') !== false) {
-            return (string)getenv('SS_AWS_S3_BUCKET_NAME');
-        }
-        if (getenv('SS_AWS_BUCKET_NAME') !== false) {
-            return (string)getenv('SS_AWS_BUCKET_NAME');
+        if (getenv('AWS_BUCKET_NAME') !== false) {
+            return (string) getenv('AWS_BUCKET_NAME');
         }
         throw new LogicException(
-            'No valid AWS S3 bucket found. Please add SS_AWS_S3_BUCKET_NAME to your env.'
+            'No valid AWS S3 bucket found. Please set AWS_BUCKET_NAME to your env.'
         );
     }
+
 }

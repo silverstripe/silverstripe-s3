@@ -25,13 +25,10 @@ class S3ClientFactory implements Factory
      *
      * @return string
      */
-    public function findAwsKey()
+    public function findAwsKeyId()
     {
-        if (getenv('SS_AWS_S3_KEY') !== false) {
-            return (string)getenv('SS_AWS_S3_KEY');
-        }
-        if (getenv('SS_AWS_KEY') !== false) {
-            return (string)getenv('SS_AWS_KEY');
+        if (getenv('AWS_ACCESS_KEY_ID') !== false) {
+            return (string) getenv('AWS_ACCESS_KEY_ID');
         }
         return null;
     }
@@ -41,13 +38,10 @@ class S3ClientFactory implements Factory
      *
      * @return string
      */
-    public function findAwsSecret()
+    public function findAwsSecretKey()
     {
-        if (getenv('SS_AWS_S3_SECRET') !== false) {
-            return (string)getenv('SS_AWS_S3_SECRET');
-        }
-        if (getenv('SS_AWS_SECRET') !== false) {
-            return (string)getenv('SS_AWS_SECRET');
+        if (getenv('AWS_SECRET_ACCESS_KEY') !== false) {
+            return (string) getenv('AWS_SECRET_ACCESS_KEY');
         }
         return null;
     }
@@ -59,13 +53,10 @@ class S3ClientFactory implements Factory
      */
     public function findAwsRegion()
     {
-        if (getenv('SS_AWS_S3_REGION') !== false) {
-            return (string)getenv('SS_AWS_S3_REGION');
+        if (getenv('AWS_REGION') !== false) {
+            return (string) getenv('AWS_REGION');
         }
-        if (getenv('SS_AWS_REGION') !== false) {
-            return (string)getenv('SS_AWS_REGION');
-        }
-        throw new LogicException('No valid AWS region specified. Please add SS_AWS_S3_REGION to your env.');
+        throw new LogicException('No valid AWS region specified. Please set AWS_REGION in your env.');
     }
 
     /**
@@ -79,12 +70,12 @@ class S3ClientFactory implements Factory
             'region' => $this->findAwsRegion(),
             'version' => 'latest'
         ];
-        $key = $this->findAwsKey();
-        $secret = $this->findAwsSecret();
+        $key = $this->findAwsKeyId();
+        $secret = $this->findAwsSecretKey();
         if ($key && $secret) {
             $args['credentials'] = [
-                'key' => $this->findAwsKey(),
-                'secret' => $this->findAwsSecret()
+                'key' => $key,
+                'secret' => $secret
             ];
         }
         return $args;
