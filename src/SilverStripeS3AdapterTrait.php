@@ -11,17 +11,15 @@ use LogicException;
 trait SilverStripeS3AdapterTrait
 {
     /**
-     * @return string
      * @throws LogicException
+     *
+     * @return string
      */
     public function findAwsBucket()
     {
         if (getenv('AWS_BUCKET_NAME') !== false) {
             return (string) getenv('AWS_BUCKET_NAME');
         }
-        throw new LogicException(
-            'No valid AWS S3 bucket found. Please set AWS_BUCKET_NAME to your env.'
-        );
+        throw new LogicException('AWS_BUCKET_NAME environment variable not set');
     }
-
 }
