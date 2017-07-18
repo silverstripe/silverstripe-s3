@@ -6,15 +6,11 @@ After:
 SilverStripe\Core\Injector\Injector:
   Aws\S3\S3Client:
     factory: Madmatt\SilverStripeS3\ClientFactory
-  Aws\CloudFront\CloudFrontClient:
-    factory: Madmatt\SilverStripeS3\ClientFactory
   SilverStripe\Assets\Flysystem\PublicAdapter:
     class: Madmatt\SilverStripeS3\SilverStripeS3PublicAdapter
     constructor:
       s3Client: %$Aws\S3\S3Client
-      cloudFrontClient: %$Aws\CloudFront\CloudFrontClient
   SilverStripe\Assets\Flysystem\ProtectedAdapter:
     class: Madmatt\SilverStripeS3\SilverStripeS3ProtectedAdapter
     constructor:
       s3Client: %$Aws\S3\S3Client
-      cloudFrontClient: %$Aws\CloudFront\CloudFrontClient

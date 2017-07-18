@@ -2,7 +2,6 @@
 
 namespace Madmatt\SilverStripeS3;
 
-use Aws\CloudFront\CloudFrontClient;
 use Aws\S3\S3Client;
 use League\Flysystem\AwsS3v3\AwsS3Adapter;
 use SilverStripe\Assets\Flysystem\ProtectedAdapter;
@@ -22,17 +21,10 @@ class SilverStripeS3ProtectedAdapter extends AwsS3Adapter implements ProtectedAd
     protected $expiry = 300;
 
     /**
-     * @var CloudFrontClient
+     * @param S3Client $s3Client
      */
-    protected $cloudFrontClient;
-
-    /**
-     * @param S3Client         $s3Client
-     * @param CloudFrontClient $cloudFrontClient
-     */
-    public function __construct(S3Client $s3Client, CloudFrontClient $cloudFrontClient)
+    public function __construct(S3Client $s3Client)
     {
-        $this->cloudFrontClient = $cloudFrontClient;
         parent::__construct($s3Client, $this->findAwsBucket(), $this->findBucketPrefix());
     }
 
@@ -53,75 +45,11 @@ class SilverStripeS3ProtectedAdapter extends AwsS3Adapter implements ProtectedAd
     }
 
     /**
-     * @return CloudFrontClient
-     */
-    public function getCloudFrontClient()
-    {
-        return $this->cloudFrontClient;
-    }
-
-    /**
      * @param string $path
      *
      * @return string
      */
     public function getProtectedUrl($path)
-    {
-        if (
-            getenv('AWS_CLOUDFRONT_PROTECTED_DISTRIBUTION_URL') &&
-            file_exists($this->findCloudFrontPrivateKeyPath())
-        ) {
-            return $this->getDistributionUrl($path);
-        }
-
-        return $this->getBucketUrl($path);
-    }
-
-    /**
-     * @return string
-     */
-    protected function findBucketPrefix()
-    {
-        $prefix = 'protected';
-        if (getenv('AWS_PROTECTED_BUCKET_PREFIX') !== false) {
-            $prefix = (string) getenv('AWS_PROTECTED_BUCKET_PREFIX');
-        }
-
-        return $prefix;
-    }
-
-    /**
-     * @throws LogicException
-     *
-     * @return string
-     */
-    protected function findCloudFrontPrivateKeyId()
-    {
-        if (getenv('AWS_CLOUDFRONT_PRIVATE_KEY_ID') !== false) {
-            return (string) getenv('AWS_CLOUDFRONT_PRIVATE_KEY_ID');
-        }
-        throw new LogicException('AWS_CLOUDFRONT_PRIVATE_KEY_ID environment variable not set');
-    }
-
-    /**
-     * @throws LogicException
-     *
-     * @return string
-     */
-    protected function findCloudFrontPrivateKeyPath()
-    {
-        if (getenv('AWS_CLOUDFRONT_PRIVATE_KEY_PATH') !== false) {
-            return (string) getenv('AWS_CLOUDFRONT_PRIVATE_KEY_PATH');
-        }
-        throw new LogicException('AWS_CLOUDFRONT_PRIVATE_KEY_PATH environment variable not set');
-    }
-
-    /**
-     * @param string $path
-     *
-     * @return string
-     */
-    protected function getBucketUrl($path)
     {
         $cmd = $this->getClient()
             ->getCommand('GetObject', [
@@ -135,17 +63,15 @@ class SilverStripeS3ProtectedAdapter extends AwsS3Adapter implements ProtectedAd
     }
 
     /**
-     * @param string $path
-     *
      * @return string
      */
-    protected function getDistributionUrl($path)
+    protected function findBucketPrefix()
     {
-        return $this->getCloudFrontClient()->getSignedUrl([
-            'url' => sprintf('%s/%s', getenv('AWS_CLOUDFRONT_PROTECTED_DISTRIBUTION_URL'), $path),
-            'expires' => time() + $this->getExpiry(),
-            'private_key' => $this->findCloudFrontPrivateKeyPath(),
-            'key_pair_id' => $this->findCloudFrontPrivateKeyId(),
-        ]);
+        $prefix = 'protected';
+        if (getenv('AWS_PROTECTED_BUCKET_PREFIX') !== false) {
+            $prefix = (string) getenv('AWS_PROTECTED_BUCKET_PREFIX');
+        }
+
+        return $prefix;
     }
 }
