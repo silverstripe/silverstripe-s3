@@ -14,9 +14,9 @@ class SilverStripeS3ProtectedAdapter extends AwsS3Adapter implements ProtectedAd
     use SilverStripeS3AdapterTrait;
 
     /**
-     * Pre-signed request expiration time in seconds.
+     * Pre-signed request expiration time in seconds, or relative string
      *
-     * @var mixed
+     * @var int|string
      */
     protected $expiry = 300;
 
@@ -29,7 +29,7 @@ class SilverStripeS3ProtectedAdapter extends AwsS3Adapter implements ProtectedAd
     }
 
     /**
-     * @return mixed
+     * @return int|string
      */
     public function getExpiry()
     {
@@ -37,11 +37,16 @@ class SilverStripeS3ProtectedAdapter extends AwsS3Adapter implements ProtectedAd
     }
 
     /**
-     * @param mixed $expiry
+     * Set expiry. Supports either number of seconds (in int) or
+     * a literal relative string.
+     *
+     * @param int|string $expiry
+     * @return $this
      */
     public function setExpiry($expiry)
     {
-        $this->expiry = $expires;
+        $this->expiry = $expiry;
+        return $this;
     }
 
     /**
@@ -57,8 +62,14 @@ class SilverStripeS3ProtectedAdapter extends AwsS3Adapter implements ProtectedAd
                 'Key' => $this->applyPathPrefix($path),
             ]);
 
+        // Format expiry
+        $expiry = $this->getExpiry();
+        if (is_numeric($expiry)) {
+            $expiry = "+{$expiry} seconds";
+        }
+
         return (string) $this->getClient()
-            ->createPresignedRequest($cmd, time() + $this->getExpiry())
+            ->createPresignedRequest($cmd, $expiry)
             ->getUri();
     }
 
