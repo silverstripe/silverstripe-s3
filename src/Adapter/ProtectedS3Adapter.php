@@ -1,18 +1,17 @@
 <?php
 
-namespace Madmatt\SilverStripeS3;
+namespace Madmatt\SilverStripeS3\Adapter;
 
 use Aws\S3\S3Client;
+use InvalidArgumentException;
 use League\Flysystem\AwsS3v3\AwsS3Adapter;
 use SilverStripe\Assets\Flysystem\ProtectedAdapter;
 
 /**
  * An adapter that allows the use of AWS S3 to store and transmit assets rather than storing them locally.
  */
-class SilverStripeS3ProtectedAdapter extends AwsS3Adapter implements ProtectedAdapter
+class ProtectedS3Adapter extends AwsS3Adapter implements ProtectedAdapter
 {
-    use SilverStripeS3AdapterTrait;
-
     /**
      * Pre-signed request expiration time in seconds, or relative string
      *
@@ -20,12 +19,15 @@ class SilverStripeS3ProtectedAdapter extends AwsS3Adapter implements ProtectedAd
      */
     protected $expiry = 300;
 
-    /**
-     * @param S3Client $s3Client
-     */
-    public function __construct(S3Client $s3Client)
+    public function __construct(S3Client $client, $bucket, $prefix = '', array $options = [])
     {
-        parent::__construct($s3Client, $this->findAwsBucket(), $this->findBucketPrefix());
+        if (!$bucket) {
+            throw new InvalidArgumentException("AWS_BUCKET_NAME environment variable not set");
+        }
+        if (!$prefix) {
+            $prefix = 'protected';
+        }
+        parent::__construct($client, $bucket, $prefix, $options);
     }
 
     /**
@@ -71,18 +73,5 @@ class SilverStripeS3ProtectedAdapter extends AwsS3Adapter implements ProtectedAd
         return (string) $this->getClient()
             ->createPresignedRequest($cmd, $expiry)
             ->getUri();
-    }
-
-    /**
-     * @return string
-     */
-    protected function findBucketPrefix()
-    {
-        $prefix = 'protected';
-        if (getenv('AWS_PROTECTED_BUCKET_PREFIX') !== false) {
-            $prefix = (string) getenv('AWS_PROTECTED_BUCKET_PREFIX');
-        }
-
-        return $prefix;
     }
 }

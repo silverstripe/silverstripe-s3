@@ -1,7 +1,7 @@
 ---
-Name: silverstripes3
+Name: silverstripes3-flysystem
 Only:
-  envvarset: AWS_REGION
+  envvarset: AWS_BUCKET_NAME
 After:
   - '#assetsflysystem'
 ---
@@ -12,10 +12,67 @@ SilverStripe\Core\Injector\Injector:
         region: '`AWS_REGION`'
         version: latest
   SilverStripe\Assets\Flysystem\PublicAdapter:
-    class: Madmatt\SilverStripeS3\SilverStripeS3PublicAdapter
+    class: Madmatt\SilverStripeS3\Adapter\PublicCacheAdapter
+    properties:
+      Backend: %$Madmatt\SilverStripeS3\Adapter\PublicS3Adapter
+      ContentCache: %$Madmatt\SilverStripeS3\Cache\ContentWarmer
+      MetadataCache: %$Psr\SimpleCache\CacheInterface.s3metadata.public
+  Madmatt\SilverStripeS3\Adapter\PublicS3Adapter:
     constructor:
       s3Client: %$Aws\S3\S3Client
+      bucket: '`AWS_BUCKET_NAME`'
+      prefix: '`AWS_PUBLIC_BUCKET_PREFIX`'
   SilverStripe\Assets\Flysystem\ProtectedAdapter:
-    class: Madmatt\SilverStripeS3\SilverStripeS3ProtectedAdapter
+    class: Madmatt\SilverStripeS3\Adapter\ProtectedCacheAdapter
+    properties:
+      Backend: %$Madmatt\SilverStripeS3\Adapter\ProtectedS3Adapter
+      ContentCache: %$Madmatt\SilverStripeS3\Cache\ContentWarmer
+      MetadataCache: %$Psr\SimpleCache\CacheInterface.s3metadata.protected
+  Madmatt\SilverStripeS3\Adapter\ProtectedS3Adapter:
     constructor:
       s3Client: %$Aws\S3\S3Client
+      bucket: '`AWS_BUCKET_NAME`'
+      prefix: '`AWS_PROTECTED_BUCKET_PREFIX`'
+---
+Name: silverstripes3-cache
+Only:
+  envvarset: AWS_BUCKET_NAME
+---
+SilverStripe\Core\Injector\Injector:
+  # Metadata cache
+  Psr\SimpleCache\CacheInterface.s3metadata.public:
+    factory: SilverStripe\Core\Cache\CacheFactory
+    constructor:
+      namespace: 's3metadatapublic'
+  Psr\SimpleCache\CacheInterface.s3metadata.protected:
+    factory: SilverStripe\Core\Cache\CacheFactory
+    constructor:
+      namespace: 's3metadataprotected'
+  # Internal cache for remembering locations of cached files
+  # Note: This cache should not be shared across a clustered environment, as it
+  # points to local paths
+  Psr\SimpleCache\CacheInterface.s3locations:
+    factory: SilverStripe\Core\Cache\CacheFactory
+    constructor:
+      namespace: 's3locations'
+  # Backend cache for file content
+  Madmatt\SilverStripeS3\Cache\ContentCache:
+    class: Madmatt\SilverStripeS3\Cache\ContentCache
+    properties:
+      LocationCache: %$Psr\SimpleCache\CacheInterface.s3locations
+  # Warmer for file content
+  Madmatt\SilverStripeS3\Cache\ContentWarmer: %$Madmatt\SilverStripeS3\Cache\ContentCache
+---
+Name: silverstripes3-assetscore
+Only:
+  envvarset: AWS_BUCKET_NAME
+After:
+  - '#assetscore'
+  - '#silverstripes3-cache'
+---
+SilverStripe\Core\Injector\Injector:
+  # Define our SS asset backend
+  SilverStripe\Assets\Storage\AssetStore:
+    class: Madmatt\SilverStripeS3\S3AssetStore
+    properties:
+      ContentWarmer: %$Madmatt\SilverStripeS3\Cache\ContentWarmer
