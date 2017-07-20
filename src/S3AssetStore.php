@@ -1,9 +1,9 @@
 <?php
 
-namespace Madmatt\SilverStripeS3;
+namespace SilverStripe\S3;
 
 use League\Flysystem\Filesystem;
-use Madmatt\SilverStripeS3\Cache\ContentWarmer;
+use SilverStripe\S3\Cache\ContentWarmer;
 use SilverStripe\Assets\Flysystem\FlysystemAssetStore;
 
 /**

@@ -1,6 +1,6 @@
 <?php
 
-namespace Madmatt\SilverStripeS3\Adapter;
+namespace SilverStripe\S3\Adapter;
 
 use Aws\S3\S3Client;
 use InvalidArgumentException;

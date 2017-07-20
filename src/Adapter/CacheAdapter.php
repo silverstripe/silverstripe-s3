@@ -1,12 +1,11 @@
 <?php
 
-
-namespace Madmatt\SilverStripeS3\Adapter;
+namespace SilverStripe\S3\Adapter;
 
 use finfo;
 use League\Flysystem\AdapterInterface;
 use League\Flysystem\Config;
-use Madmatt\SilverStripeS3\Cache\ContentCache;
+use SilverStripe\S3\Cache\ContentCache;
 use Psr\SimpleCache\CacheInterface;
 use SplFileInfo;
 

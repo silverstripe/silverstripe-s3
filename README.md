@@ -23,7 +23,7 @@ If running outside of an EC2 instance it will be necessary to specify an API key
 
 * Define the environment variables listed above.
 * [Install Composer from https://getcomposer.org](https://getcomposer.org/download/)
-* Run `composer require madmatt/silverstripe-s3`
+* Run `composer require silverstripe/s3`
 
 This will install the most recent applicable version of the module given your other Composer
 requirements.
@@ -31,7 +31,7 @@ requirements.
 **Note:** This currently immediately replaces the built-in local asset store that comes with
 SilverStripe with one based on S3. Any files that had previously been uploaded to an existing
 asset store will be unavailable (though they won't be lost - just run `composer remove
-madmatt/silverstripe-s3` to remove the module and restore access).
+silverstripe/s3` to remove the module and restore access).
 
 ## Configuration
 
@@ -82,4 +82,4 @@ Make sure you replace `<bucket-name>` and `<your-ARN>` below with the appropriat
 
 ## Uninstalling
 
-* Run `composer remove madmatt/silverstripe-s3` to remove the module.
+* Run `composer remove silverstripe/s3` to remove the module.

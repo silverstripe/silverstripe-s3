@@ -1,6 +1,6 @@
 <?php
 
-namespace Madmatt\SilverStripeS3\Cache;
+namespace SilverStripe\S3\Cache;
 
 use Psr\SimpleCache\CacheInterface;
 
