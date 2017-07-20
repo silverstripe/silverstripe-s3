@@ -1,6 +1,6 @@
 <?php
 
-namespace Madmatt\SilverStripeS3\Adapter;
+namespace SilverStripe\S3\Adapter;
 
 use BadMethodCallException;
 use League\Flysystem\AdapterInterface;

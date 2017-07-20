@@ -12,23 +12,23 @@ SilverStripe\Core\Injector\Injector:
         region: '`AWS_REGION`'
         version: latest
   SilverStripe\Assets\Flysystem\PublicAdapter:
-    class: Madmatt\SilverStripeS3\Adapter\PublicCacheAdapter
+    class: SilverStripe\S3\Adapter\PublicCacheAdapter
     properties:
-      Backend: %$Madmatt\SilverStripeS3\Adapter\PublicS3Adapter
-      ContentCache: %$Madmatt\SilverStripeS3\Cache\ContentWarmer
+      Backend: %$SilverStripe\S3\Adapter\PublicS3Adapter
+      ContentCache: %$SilverStripe\S3\Cache\ContentWarmer
       MetadataCache: %$Psr\SimpleCache\CacheInterface.s3metadata.public
-  Madmatt\SilverStripeS3\Adapter\PublicS3Adapter:
+  SilverStripe\S3\Adapter\PublicS3Adapter:
     constructor:
       s3Client: %$Aws\S3\S3Client
       bucket: '`AWS_BUCKET_NAME`'
       prefix: '`AWS_PUBLIC_BUCKET_PREFIX`'
   SilverStripe\Assets\Flysystem\ProtectedAdapter:
-    class: Madmatt\SilverStripeS3\Adapter\ProtectedCacheAdapter
+    class: SilverStripe\S3\Adapter\ProtectedCacheAdapter
     properties:
-      Backend: %$Madmatt\SilverStripeS3\Adapter\ProtectedS3Adapter
-      ContentCache: %$Madmatt\SilverStripeS3\Cache\ContentWarmer
+      Backend: %$SilverStripe\S3\Adapter\ProtectedS3Adapter
+      ContentCache: %$SilverStripe\S3\Cache\ContentWarmer
       MetadataCache: %$Psr\SimpleCache\CacheInterface.s3metadata.protected
-  Madmatt\SilverStripeS3\Adapter\ProtectedS3Adapter:
+  SilverStripe\S3\Adapter\ProtectedS3Adapter:
     constructor:
       s3Client: %$Aws\S3\S3Client
       bucket: '`AWS_BUCKET_NAME`'
@@ -56,12 +56,12 @@ SilverStripe\Core\Injector\Injector:
     constructor:
       namespace: 's3locations'
   # Backend cache for file content
-  Madmatt\SilverStripeS3\Cache\ContentCache:
-    class: Madmatt\SilverStripeS3\Cache\ContentCache
+  SilverStripe\S3\Cache\ContentCache:
+    class: SilverStripe\S3\Cache\ContentCache
     properties:
       LocationCache: %$Psr\SimpleCache\CacheInterface.s3locations
   # Warmer for file content
-  Madmatt\SilverStripeS3\Cache\ContentWarmer: %$Madmatt\SilverStripeS3\Cache\ContentCache
+  SilverStripe\S3\Cache\ContentWarmer: %$SilverStripe\S3\Cache\ContentCache
 ---
 Name: silverstripes3-assetscore
 Only:
@@ -73,6 +73,6 @@ After:
 SilverStripe\Core\Injector\Injector:
   # Define our SS asset backend
   SilverStripe\Assets\Storage\AssetStore:
-    class: Madmatt\SilverStripeS3\S3AssetStore
+    class: SilverStripe\S3\S3AssetStore
     properties:
-      ContentWarmer: %$Madmatt\SilverStripeS3\Cache\ContentWarmer
+      ContentWarmer: %$SilverStripe\S3\Cache\ContentWarmer
