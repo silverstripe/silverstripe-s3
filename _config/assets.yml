@@ -14,23 +14,23 @@ SilverStripe\Core\Injector\Injector:
   SilverStripe\Assets\Flysystem\PublicAdapter:
     class: SilverStripe\S3\Adapter\PublicCacheAdapter
     properties:
-      Backend: %$SilverStripe\S3\Adapter\PublicS3Adapter
-      ContentCache: %$SilverStripe\S3\Cache\ContentWarmer
-      MetadataCache: %$Psr\SimpleCache\CacheInterface.s3metadata.public
+      Backend: '%$SilverStripe\S3\Adapter\PublicS3Adapter'
+      ContentCache: '%$SilverStripe\S3\Cache\ContentWarmer'
+      MetadataCache: '%$Psr\SimpleCache\CacheInterface.s3metadata.public'
   SilverStripe\S3\Adapter\PublicS3Adapter:
     constructor:
-      s3Client: %$Aws\S3\S3Client
+      s3Client: '%$Aws\S3\S3Client'
       bucket: '`AWS_BUCKET_NAME`'
       prefix: '`AWS_PUBLIC_BUCKET_PREFIX`'
   SilverStripe\Assets\Flysystem\ProtectedAdapter:
     class: SilverStripe\S3\Adapter\ProtectedCacheAdapter
     properties:
-      Backend: %$SilverStripe\S3\Adapter\ProtectedS3Adapter
-      ContentCache: %$SilverStripe\S3\Cache\ContentWarmer
-      MetadataCache: %$Psr\SimpleCache\CacheInterface.s3metadata.protected
+      Backend: '%$SilverStripe\S3\Adapter\ProtectedS3Adapter'
+      ContentCache: '%$SilverStripe\S3\Cache\ContentWarmer'
+      MetadataCache: '%$Psr\SimpleCache\CacheInterface.s3metadata.protected'
   SilverStripe\S3\Adapter\ProtectedS3Adapter:
     constructor:
-      s3Client: %$Aws\S3\S3Client
+      s3Client: '%$Aws\S3\S3Client'
       bucket: '`AWS_BUCKET_NAME`'
       prefix: '`AWS_PROTECTED_BUCKET_PREFIX`'
 ---
@@ -59,9 +59,9 @@ SilverStripe\Core\Injector\Injector:
   SilverStripe\S3\Cache\ContentCache:
     class: SilverStripe\S3\Cache\ContentCache
     properties:
-      LocationCache: %$Psr\SimpleCache\CacheInterface.s3locations
+      LocationCache: '%$Psr\SimpleCache\CacheInterface.s3locations'
   # Warmer for file content
-  SilverStripe\S3\Cache\ContentWarmer: %$SilverStripe\S3\Cache\ContentCache
+  SilverStripe\S3\Cache\ContentWarmer: '%$SilverStripe\S3\Cache\ContentCache'
 ---
 Name: silverstripes3-assetscore
 Only:
@@ -75,4 +75,4 @@ SilverStripe\Core\Injector\Injector:
   SilverStripe\Assets\Storage\AssetStore:
     class: SilverStripe\S3\S3AssetStore
     properties:
-      ContentWarmer: %$SilverStripe\S3\Cache\ContentWarmer
+      ContentWarmer: '%$SilverStripe\S3\Cache\ContentWarmer'
