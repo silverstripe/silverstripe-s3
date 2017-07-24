@@ -5,6 +5,9 @@ namespace SilverStripe\S3\Cache;
 use Exception;
 use League\Flysystem\Util;
 use Psr\SimpleCache\CacheInterface;
+use SilverStripe\Control\Director;
+use SilverStripe\Core\Environment;
+use SilverStripe\Core\TempFolder;
 
 /**
  * Captures local files for immediate access, saving unnecessary back-end requests
@@ -131,7 +134,7 @@ class ContentCache implements ContentWarmer
      */
     protected function createTempFile()
     {
-        return tempnam(sys_get_temp_dir(), 'ssflysystem');
+        return tempnam(TempFolder::getTempFolder(Director::baseFolder()), 'ssflysystem');
     }
 
     public function set($key, $value, $ttl = null)

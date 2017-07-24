@@ -117,6 +117,7 @@ class CacheAdapter implements AdapterInterface
         $result = $this->getBackend()->read($path);
         if ($result) {
             $this->getContentCache()->warmFromString($fileKey, $result['contents']);
+            $this->setCachedHas($path, true);
         }
         return $result;
     }
@@ -135,6 +136,7 @@ class CacheAdapter implements AdapterInterface
         $result = $this->getBackend()->readStream($path);
         if ($result) {
             $this->getContentCache()->warmFromStream($fileKey, $result['stream']);
+            $this->setCachedHas($path, true);
         }
         return $result;
     }
@@ -150,15 +152,16 @@ class CacheAdapter implements AdapterInterface
         $fileKey = sha1($path);
         $this->getContentCache()->warmFromStream($fileKey, $resource);
 
-        // Warm metadata cache
+        // Update metadata cache
         $localPath = $this->getContentCache()->get($fileKey);
+        $metadata = $this->getCachedMetadata($path) ?: null;
         if ($localPath) {
             $metadata = $this->approximateMetadata($path, $localPath);
-            $this->setCachedMetadata($path, $metadata);
         }
 
-        // Warm visibility cache
+        // Warm / reset caches
         $this->setCachedHas($path, true);
+        $this->setCachedMetadata($path, $metadata);
 
         return $this->getBackend()->writeStream($path, $resource, $config);
     }
@@ -174,15 +177,16 @@ class CacheAdapter implements AdapterInterface
         $fileKey = sha1($path);
         $this->getContentCache()->warmFromString($fileKey, $contents);
 
-        // Warm metadata cache
+        // Update metadata cache
         $localPath = $this->getContentCache()->get($fileKey);
+        $metadata = $this->getCachedMetadata($path) ?: null;
         if ($localPath) {
             $metadata = $this->approximateMetadata($path, $localPath);
-            $this->setCachedMetadata($path, $metadata);
         }
 
-        // Warm has cache
+        // Warm / reset caches
         $this->setCachedHas($path, true);
+        $this->setCachedMetadata($path, $metadata);
 
         return $this->getBackend()->update($path, $contents, $config);
     }
@@ -199,7 +203,6 @@ class CacheAdapter implements AdapterInterface
         $this->deleteMetadata($path);
         return $this->getBackend()->rename($path, $newpath);
     }
-
 
     public function delete($path)
     {

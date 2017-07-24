@@ -24,7 +24,19 @@
     },
     "autoload": {
         "psr-4": {
-            "SilverStripe\\S3\\": "src/"
+            "SilverStripe\\S3\\": "src/",
+            "SilverStripe\\S3\\Tests\\": "tests/"
         }
-    }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0.x-dev"
+        }
+    },
+    "scripts": {
+        "lint": "phpcs src/ tests/",
+        "lint-clean": "phpcbf src/ tests/"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
 }
