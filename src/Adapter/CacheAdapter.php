@@ -20,9 +20,9 @@ class CacheAdapter implements AdapterInterface
     const METADATA = 'metadata_';
 
     /**
-     * Cache prefix for visibility (not strictly a part of metadata)
+     * Cache prefix for gnostic exists (null means unknown)
      */
-    const VISIBILITY = 'visibility_';
+    const HAS = 'has_';
 
     /**
      * Cache to use for metadata
@@ -154,8 +154,11 @@ class CacheAdapter implements AdapterInterface
         $localPath = $this->getContentCache()->get($fileKey);
         if ($localPath) {
             $metadata = $this->approximateMetadata($path, $localPath);
-            $this->getMetadataCache()->set(self::METADATA . $fileKey, $metadata);
+            $this->setCachedMetadata($path, $metadata);
         }
+
+        // Warm visibility cache
+        $this->setCachedHas($path, true);
 
         return $this->getBackend()->writeStream($path, $resource, $config);
     }
@@ -175,8 +178,11 @@ class CacheAdapter implements AdapterInterface
         $localPath = $this->getContentCache()->get($fileKey);
         if ($localPath) {
             $metadata = $this->approximateMetadata($path, $localPath);
-            $this->getMetadataCache()->set(self::METADATA . $fileKey, $metadata);
+            $this->setCachedMetadata($path, $metadata);
         }
+
+        // Warm has cache
+        $this->setCachedHas($path, true);
 
         return $this->getBackend()->update($path, $contents, $config);
     }
@@ -203,28 +209,12 @@ class CacheAdapter implements AdapterInterface
 
     public function getVisibility($path)
     {
-        $fileKey = sha1($path);
-        $visibility = $this->getMetadataCache()->get(self::VISIBILITY . $fileKey);
-        if ($visibility) {
-            return ['path' => $path, 'visibility' => $visibility];
-        }
-
-        // Get or set visibility (signature is the same)
-        $result = $this->getBackend()->getVisibility($path);
-        if ($result) {
-            $this->getMetadataCache()->set(
-                self::VISIBILITY . $fileKey,
-                $result['visibility']
-            );
-        }
-        return $result;
+        // Not cached since subclasses hard-code
+        return $this->getBackend()->getVisibility($path);
     }
 
     public function setVisibility($path, $visibility)
     {
-        // Get or set visibility (signature is the same)
-        $fileKey = sha1($path);
-        $this->getMetadataCache()->set(self::VISIBILITY . $fileKey, $visibility);
         return $this->getBackend()->setVisibility($path, $visibility);
     }
 
@@ -243,47 +233,59 @@ class CacheAdapter implements AdapterInterface
         return $this->getMetadata($path);
     }
 
+    /**
+     * Get metadata.
+     * Note: This method makes no assumption about existance in the backend,
+     * and may find metadata for records that don't physically exist
+     *
+     * @param string $path
+     * @return array|false
+     */
     public function getMetadata($path)
     {
-        // Ccheck cached metadata
-        $fileKey = sha1($path);
-        $metadata = $this->getMetadataCache()->get(self::METADATA . $fileKey);
+        // Check cached metadata
+        $metadata = $this->getCachedMetadata($path);
         if (isset($metadata)) {
             return $metadata ?: false; // Convert empty arrays to false
         }
 
-        // Check if we can approximate from local cache
-        $localPath = $this->getContentCache()->get($fileKey);
+        // Check if we can approximate from local cache, or fail over to backend
+        $localPath = $this->getContentCache()->get(sha1($path));
         if ($localPath) {
             $metadata = $this->approximateMetadata($path, $localPath);
         } else {
-            // Fail over to call backend
-            $metadata = $this->getBackend()->getMetadata($path);
-            if (!$metadata) {
-                return false;
-            }
-
-            // Some backends need extra calls to merge in certain fields
-            if (!isset($metadata['size'])) {
-                $metadata = array_merge($metadata, $this->getBackend()->getSize($path));
-            }
-            if (!isset($metadata['mimetype'])) {
-                $metadata = array_merge($metadata, $this->getBackend()->getMimetype($path));
-            }
-            if (!isset($metadata['timestamp'])) {
-                $metadata = array_merge($metadata, $this->getBackend()->getTimestamp($path));
-            }
+            // Fail over to call backend, and pre-warm has cache
+            $metadata = $this->getBackendMetadata($path);
+            $this->setCachedHas($path, !empty($metadata));
         }
 
         // Save metadata for next time
-        $this->getMetadataCache()->set(self::METADATA . $fileKey, $metadata);
+        $this->setCachedMetadata($path, $metadata);
         return $metadata;
     }
 
+    /**
+     * Determine existence of this record in the cached backend.
+     * Note: this method will also cache metadat, but uses a slightly more
+     * discerning implementation of getMetadata()
+     *
+     * @param string $path
+     * @return bool
+     */
     public function has($path)
     {
-        $metadata = $this->getMetadata($path);
-        return !empty($metadata);
+        // Check has-cache
+        $exists = $this->getCachedHas($path);
+        if (isset($exists)) {
+            return $exists;
+        }
+
+        // Live request the backend cache
+        $metadata = $this->getBackendMetadata($path);
+        $has = !empty($metadata);
+        $this->setCachedMetadata($path, $metadata);
+        $this->setCachedHas($path, $has);
+        return $has;
     }
 
     public function deleteDir($dirname)
@@ -305,33 +307,34 @@ class CacheAdapter implements AdapterInterface
      * Copy metadata from one path to another
      *
      * @param string $path
-     * @param string $newpath
+     * @param string $newPath
      */
-    protected function copyMetadata($path, $newpath)
+    protected function copyMetadata($path, $newPath)
     {
-        // Move or copy metadata
+        // Share content cache
         $fileKey = sha1($path);
-        $newKey = sha1($newpath);
-
-        // Share content cache across to destination
+        $newKey = sha1($newPath);
         $localPath = $this->getContentCache()->get($fileKey);
         if ($localPath) {
             $this->getContentCache()->set($newKey, $localPath);
         }
 
-        // Share metadata cache
-        $metadata = $this->getMetadataCache()->get(self::METADATA . $fileKey);
-        if ($localPath || $metadata) {
+        // Share metadata cache (or infer from cached content)
+        $metadata = $this->getCachedMetadata($path) ?: [];
+        if ($metadata || $localPath) {
             // Combine metadata from source with destination
             // Either an existing $metadata or $localPath should be enough
             // to generate enough data to cache
             $newMetadata = array_merge(
                 $metadata,
-                $this->approximateMetadata($newpath, $localPath)
+                $this->approximateMetadata($newPath, $localPath)
             );
             $newMetadata['timestamp'] = time();
-            $this->getMetadataCache()->set(self::METADATA . $newKey, $newMetadata);
+            $this->setCachedMetadata($newPath, $newMetadata);
         }
+
+        // Mark new location as has = true
+        $this->setCachedHas($newPath, true);
     }
 
     /**
@@ -341,10 +344,9 @@ class CacheAdapter implements AdapterInterface
      */
     public function deleteMetadata($path)
     {
-        $fileKey = sha1($path);
-        $this->getMetadataCache()->set(self::METADATA . $fileKey, []);
-        $this->getMetadataCache()->delete(self::VISIBILITY . $fileKey);
-        $this->getContentCache()->delete($fileKey);
+        $this->setCachedMetadata($path, false);
+        $this->setCachedHas($path, false);
+        $this->getContentCache()->delete(sha1($path));
     }
 
     /**
@@ -383,5 +385,96 @@ class CacheAdapter implements AdapterInterface
             $metadata['size'] = $info->getSize();
         }
         return $metadata;
+    }
+
+    /**
+     * Get metadata for the cache
+     *
+     * @param string $path
+     * @return array|false|null
+     */
+    protected function getCachedMetadata($path)
+    {
+        $key = self::METADATA . sha1($path);
+        return $this->getMetadataCache()->get($key);
+    }
+
+    /**
+     * Get full metadata for the backend item.
+     * Note that for some backends, a lot of extra work can be done,
+     * but it does ensure a complete metadata is cached for each entry.
+     *
+     * @param string $path
+     * @return array|false
+     */
+    protected function getBackendMetadata($path)
+    {
+        // Fail over to call backend
+        $metadata = $this->getBackend()->getMetadata($path);
+        if (!$metadata) {
+            return false;
+        }
+
+        // Some backends need extra calls to merge in certain fields
+        if (!isset($metadata['size'])) {
+            $metadata = array_merge($metadata, $this->getBackend()->getSize($path));
+        }
+        if (!isset($metadata['mimetype'])) {
+            $metadata = array_merge($metadata, $this->getBackend()->getMimetype($path));
+        }
+        if (!isset($metadata['timestamp'])) {
+            $metadata = array_merge($metadata, $this->getBackend()->getTimestamp($path));
+        }
+
+        return $metadata;
+    }
+
+    /**
+     * Set metadata in cache
+     *
+     * @param string $path
+     * @param array|false|null $metadata
+     * @return $this
+     */
+    protected function setCachedMetadata($path, $metadata)
+    {
+        $key = self::METADATA . sha1($path);
+        if (isset($metadata)) {
+            $this->getMetadataCache()->set($key, $metadata);
+        } else {
+            $this->getMetadataCache()->delete($key);
+        }
+        return $this;
+    }
+
+    /**
+     * Check if cache knows if this file exists.
+     * Null means it doesn't know.
+     *
+     * @param string $path
+     * @return bool|null
+     */
+    protected function getCachedHas($path)
+    {
+        $key = self::HAS . sha1($path);
+        return $this->getMetadataCache()->get($key);
+    }
+
+    /**
+     * Tell cache that we know if this file exists
+     *
+     * @param string $path
+     * @param bool|null $exists
+     * @return $this
+     */
+    protected function setCachedHas($path, $exists)
+    {
+        $key = self::HAS . sha1($path);
+        if (isset($exists)) {
+            $this->getMetadataCache()->set($key, $exists);
+        } else {
+            $this->getMetadataCache()->delete($key);
+        }
+        return $this;
     }
 }

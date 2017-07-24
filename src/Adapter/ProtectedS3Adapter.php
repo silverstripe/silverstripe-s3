@@ -70,8 +70,14 @@ class ProtectedS3Adapter extends AwsS3Adapter implements ProtectedAdapter
             $expiry = "+{$expiry} seconds";
         }
 
-        return (string) $this->getClient()
+        return (string)$this->getClient()
             ->createPresignedRequest($cmd, $expiry)
             ->getUri();
+    }
+
+    public function getVisibility($path)
+    {
+        // Save an API call
+        return ['path' => $path, 'visibility' => self::VISIBILITY_PRIVATE];
     }
 }
