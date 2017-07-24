@@ -32,4 +32,10 @@ class PublicCacheAdapter extends CacheAdapter implements PublicAdapter
     {
         return $this->getBackend()->getPublicUrl($path);
     }
+
+    public function getVisibility($path)
+    {
+        // Save an API call
+        return ['path' => $path, 'visibility' => self::VISIBILITY_PUBLIC];
+    }
 }
