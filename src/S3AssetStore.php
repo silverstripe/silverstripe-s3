@@ -29,7 +29,7 @@ class S3AssetStore extends FlysystemAssetStore
         return $this->contentWarmer;
     }
 
-    public function setContentWarmer(ContentWarmer $warmer)
+    public function setContentWarmer(ContentWarmer $warmer = null)
     {
         $this->contentWarmer = $warmer;
         return $this;

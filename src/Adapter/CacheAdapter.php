@@ -7,6 +7,7 @@ use League\Flysystem\AdapterInterface;
 use League\Flysystem\Config;
 use SilverStripe\S3\Cache\ContentCache;
 use Psr\SimpleCache\CacheInterface;
+use SilverStripe\S3\Cache\ContentWarmer;
 use SplFileInfo;
 
 /**
@@ -34,7 +35,7 @@ class CacheAdapter implements AdapterInterface
     /**
      * Cache to use for content (optional)
      *
-     * @var ContentCache
+     * @var ContentWarmer
      */
     protected $contentCache = null;
 
@@ -64,7 +65,7 @@ class CacheAdapter implements AdapterInterface
      * This service will be both used to intercept uploaded content and extract metadata,
      * and can be used to bypass upstream content request calls for existant content.
      *
-     * @return ContentCache
+     * @return ContentWarmer
      */
     public function getContentCache()
     {
@@ -72,10 +73,10 @@ class CacheAdapter implements AdapterInterface
     }
 
     /**
-     * @param ContentCache $contentCache
+     * @param ContentWarmer $contentCache
      * @return $this
      */
-    public function setContentCache(ContentCache $contentCache)
+    public function setContentCache(ContentWarmer $contentCache = null)
     {
         $this->contentCache = $contentCache;
         return $this;
