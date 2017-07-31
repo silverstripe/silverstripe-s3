@@ -134,7 +134,14 @@ class ContentCache implements ContentWarmer
      */
     protected function createTempFile()
     {
-        return tempnam(TempFolder::getTempFolder(Director::baseFolder()), 'ssflysystem');
+        $filename = tempnam(TempFolder::getTempFolder(Director::baseFolder()), 'ssflysystem');
+        // Ensure this is deleted at end of process
+        register_shutdown_function(function () use ($filename) {
+            if (file_exists($filename)) {
+                unlink($filename);
+            }
+        });
+        return $filename;
     }
 
     public function set($key, $value, $ttl = null)
