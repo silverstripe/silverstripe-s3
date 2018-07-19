@@ -1,6 +1,6 @@
 {
     "name": "silverstripe/s3",
-    "type": "silverstripe-module",
+    "type": "silverstripe-vendormodule",
     "description": "Adds SilverStripe support for using the S3 adapter for Flysystem",
     "license": "BSD-3-Clause",
     "keywords": [
@@ -17,7 +17,8 @@
     ],
     "require": {
         "silverstripe/framework": "^4.0@dev",
-        "league/flysystem-aws-s3-v3": "^1.0"
+        "league/flysystem-aws-s3-v3": "^1.0",
+        "silverstripe/vendor-plugin": "^1.0"
     },
     "require-dev": {
         "phpunit/phpunit": "^5.7"
