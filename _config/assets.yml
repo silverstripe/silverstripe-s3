@@ -6,11 +6,17 @@ After:
   - '#assetsflysystem'
 ---
 SilverStripe\Core\Injector\Injector:
+  Aws\Credentials\CredentialsInterface:
+    class: Aws\Credentials\Credentials
+    constructor:
+      key: '`AWS_ACCESS_KEY_ID`'
+      secret: '`AWS_SECRET_ACCESS_KEY`'
   Aws\S3\S3Client:
     constructor:
       configuration:
         region: '`AWS_REGION`'
         version: latest
+        credentials: '%$Aws\Credentials\CredentialsInterface'
   SilverStripe\Assets\Flysystem\PublicAdapter:
     class: SilverStripe\S3\Adapter\PublicCacheAdapter
     properties:
@@ -76,3 +82,5 @@ SilverStripe\Core\Injector\Injector:
     class: SilverStripe\S3\S3AssetStore
     properties:
       ContentWarmer: '%$SilverStripe\S3\Cache\ContentWarmer'
+      PublicFilesystem: '%$League\Flysystem\Filesystem.public'
+      ProtectedFilesystem: '%$League\Flysystem\Filesystem.protected'
