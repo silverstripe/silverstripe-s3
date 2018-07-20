@@ -7,12 +7,14 @@ use League\Flysystem\Util;
 use Psr\SimpleCache\CacheInterface;
 use SilverStripe\Control\Director;
 use SilverStripe\Core\Environment;
+use SilverStripe\Core\Flushable;
+use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Core\TempFolder;
 
 /**
  * Captures local files for immediate access, saving unnecessary back-end requests
  */
-class ContentCache implements ContentWarmer
+class ContentCache implements ContentWarmer, Flushable
 {
     /**
      * Backend cache for caching file paths
@@ -179,6 +181,15 @@ class ContentCache implements ContentWarmer
     public function clear()
     {
         return $this->getLocationCache()->clear();
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public static function flush()
+    {
+        // Clear the content cache when flushing.
+        Injector::inst()->get(self::class)->clear();
     }
 
     public function getMultiple($keys, $default = null)
