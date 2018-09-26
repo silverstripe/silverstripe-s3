@@ -5,12 +5,12 @@ namespace SilverStripe\S3\Adapter;
 use Aws\S3\S3Client;
 use InvalidArgumentException;
 use League\Flysystem\AwsS3v3\AwsS3Adapter;
-use SilverStripe\Assets\Flysystem\ProtectedAdapter;
+use SilverStripe\Assets\Flysystem\ProtectedAdapter as SilverstripeProtectedAdapter;
 
 /**
  * An adapter that allows the use of AWS S3 to store and transmit assets rather than storing them locally.
  */
-class ProtectedS3Adapter extends AwsS3Adapter implements ProtectedAdapter
+class ProtectedAdapter extends AwsS3Adapter implements SilverstripeProtectedAdapter
 {
     /**
      * Pre-signed request expiration time in seconds, or relative string

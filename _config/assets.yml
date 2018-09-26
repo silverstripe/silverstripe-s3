@@ -11,68 +11,54 @@ SilverStripe\Core\Injector\Injector:
       configuration:
         region: '`AWS_REGION`'
         version: latest
-  SilverStripe\Assets\Flysystem\PublicAdapter:
-    class: SilverStripe\S3\Adapter\PublicCacheAdapter
-    properties:
-      Backend: '%$SilverStripe\S3\Adapter\PublicS3Adapter'
-      ContentCache: '%$SilverStripe\S3\Cache\ContentWarmer'
-      MetadataCache: '%$Psr\SimpleCache\CacheInterface.s3metadata.public'
-  SilverStripe\S3\Adapter\PublicS3Adapter:
+  League\Flysystem\Adapter\Local:
+    class: League\Flysystem\Adapter\Local
+    constructor:
+      root: '`TEMP_PATH`'
+
+  SilverStripe\S3\Adapter\PublicAdapter:
     constructor:
       s3Client: '%$Aws\S3\S3Client'
       bucket: '`AWS_BUCKET_NAME`'
       prefix: '`AWS_PUBLIC_BUCKET_PREFIX`'
-  SilverStripe\Assets\Flysystem\ProtectedAdapter:
-    class: SilverStripe\S3\Adapter\ProtectedCacheAdapter
-    properties:
-      Backend: '%$SilverStripe\S3\Adapter\ProtectedS3Adapter'
-      ContentCache: '%$SilverStripe\S3\Cache\ContentWarmer'
-      MetadataCache: '%$Psr\SimpleCache\CacheInterface.s3metadata.protected'
-  SilverStripe\S3\Adapter\ProtectedS3Adapter:
+  League\Flysystem\Cached\Storage\Memory.public:
+    class: League\Flysystem\Cached\Storage\Memory
+  League\Flysystem\Cached\Storage\Adapter.public:
+    class: League\Flysystem\Cached\Storage\Adapter
+    constructor:
+      adapter: '%$League\Flysystem\Adapter\Local'
+      file: 's3metadata/public'
+      expire: 300
+  SilverStripe\Assets\Flysystem\PublicAdapter:
+    class: SilverStripe\S3\Adapter\PublicCachedAdapter
+    constructor:
+      adapter: '%$SilverStripe\S3\Adapter\PublicAdapter'
+      cache: '%$League\Flysystem\Cached\Storage\Adapter.public'
+
+  SilverStripe\S3\Adapter\ProtectedAdapter:
     constructor:
       s3Client: '%$Aws\S3\S3Client'
       bucket: '`AWS_BUCKET_NAME`'
       prefix: '`AWS_PROTECTED_BUCKET_PREFIX`'
----
-Name: silverstripes3-cache
-Only:
-  envvarset: AWS_BUCKET_NAME
----
-SilverStripe\Core\Injector\Injector:
-  # Metadata cache
-  Psr\SimpleCache\CacheInterface.s3metadata.public:
-    factory: SilverStripe\Core\Cache\CacheFactory
+  League\Flysystem\Cached\Storage\Adapter.protected:
+      class: League\Flysystem\Cached\Storage\Adapter
+      constructor:
+        adapter: '%$League\Flysystem\Adapter\Local'
+        file: 's3metadata/protected'
+        expire: 300
+  SilverStripe\Assets\Flysystem\ProtectedAdapter:
+    class: SilverStripe\S3\Adapter\ProtectedCachedAdapter
     constructor:
-      namespace: 's3metadatapublic'
-  Psr\SimpleCache\CacheInterface.s3metadata.protected:
-    factory: SilverStripe\Core\Cache\CacheFactory
-    constructor:
-      namespace: 's3metadataprotected'
-  # Internal cache for remembering locations of cached files
-  # Note: This cache should not be shared across a clustered environment, as it
-  # points to local paths
-  Psr\SimpleCache\CacheInterface.s3locations:
-    factory: SilverStripe\Core\Cache\CacheFactory
-    constructor:
-      namespace: 's3locations'
-  # Backend cache for file content
-  SilverStripe\S3\Cache\ContentCache:
-    class: SilverStripe\S3\Cache\ContentCache
-    properties:
-      LocationCache: '%$Psr\SimpleCache\CacheInterface.s3locations'
-  # Warmer for file content
-  SilverStripe\S3\Cache\ContentWarmer: '%$SilverStripe\S3\Cache\ContentCache'
----
+      adapter: '%$SilverStripe\S3\Adapter\ProtectedAdapter'
+      cache: '%$League\Flysystem\Cached\Storage\Adapter.protected'
+#---
 Name: silverstripes3-assetscore
 Only:
   envvarset: AWS_BUCKET_NAME
 After:
   - '#assetscore'
-  - '#silverstripes3-cache'
 ---
 SilverStripe\Core\Injector\Injector:
   # Define our SS asset backend
   SilverStripe\Assets\Storage\AssetStore:
-    class: SilverStripe\S3\S3AssetStore
-    properties:
-      ContentWarmer: '%$SilverStripe\S3\Cache\ContentWarmer'
+    class: SilverStripe\Assets\Flysystem\FlysystemAssetStore
