@@ -28,7 +28,7 @@ SilverStripe\Core\Injector\Injector:
     constructor:
       adapter: '%$League\Flysystem\Adapter\Local'
       file: 's3metadata/public'
-      expire: 300
+      expire: 259200
   SilverStripe\Assets\Flysystem\PublicAdapter:
     class: SilverStripe\S3\Adapter\PublicCachedAdapter
     constructor:
@@ -45,7 +45,7 @@ SilverStripe\Core\Injector\Injector:
       constructor:
         adapter: '%$League\Flysystem\Adapter\Local'
         file: 's3metadata/protected'
-        expire: 300
+        expire: 259200
   SilverStripe\Assets\Flysystem\ProtectedAdapter:
     class: SilverStripe\S3\Adapter\ProtectedCachedAdapter
     constructor:
