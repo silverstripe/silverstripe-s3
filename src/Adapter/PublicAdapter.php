@@ -5,9 +5,9 @@ namespace SilverStripe\S3\Adapter;
 use Aws\S3\S3Client;
 use InvalidArgumentException;
 use League\Flysystem\AwsS3v3\AwsS3Adapter;
-use SilverStripe\Assets\Flysystem\PublicAdapter;
+use SilverStripe\Assets\Flysystem\PublicAdapter as SilverstripePublicAdapter;
 
-class PublicS3Adapter extends AwsS3Adapter implements PublicAdapter
+class PublicAdapter extends AwsS3Adapter implements SilverstripePublicAdapter
 {
     public function __construct(S3Client $client, $bucket, $prefix = '', array $options = [])
     {

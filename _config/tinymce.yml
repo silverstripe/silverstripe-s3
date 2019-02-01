@@ -1,0 +1,18 @@
+---
+After:
+  - '#corehtml'
+---
+SilverStripe\Core\Injector\Injector:
+  League\Flysystem\Filesystem.localpublic:
+    class: 'League\Flysystem\Filesystem'
+    constructor:
+      FilesystemAdapter: '%$SilverStripe\S3\Adapter\TinyMceAdapter'
+      FilesystemConfig:
+        visibility: public
+  LocalGeneratedAssetHandler:
+    class: 'SilverStripe\Assets\Flysystem\GeneratedAssets'
+    properties:
+      Filesystem: '%$League\Flysystem\Filesystem.localpublic'
+  SilverStripe\Forms\HTMLEditor\TinyMCECombinedGenerator:
+    properties:
+      AssetHandler: '%$LocalGeneratedAssetHandler'
