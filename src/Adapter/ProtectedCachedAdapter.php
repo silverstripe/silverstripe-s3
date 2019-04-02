@@ -3,9 +3,9 @@
 namespace SilverStripe\S3\Adapter;
 
 use League\Flysystem\Cached\CachedAdapter;
-use SilverStripe\Assets\Flysystem\ProtectedAdapter;
+use SilverStripe\Assets\Flysystem\ProtectedAdapter as SilverstripeProtectedAdapter;
 
-class ProtectedCachedAdapter extends CachedAdapter implements ProtectedAdapter
+class ProtectedCachedAdapter extends CachedAdapter implements SilverstripeProtectedAdapter
 {
     public function getProtectedUrl($path)
     {
