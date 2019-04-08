@@ -1,7 +1,7 @@
 {
-    "name": "obj63mc/silverstripe-s3",
+    "name": "silverstripe/s3",
     "type": "silverstripe-vendormodule",
-    "description": "Adds SilverStripe support for using the S3 adapter for Flysystem - Fork",
+    "description": "Adds SilverStripe support for using the S3 adapter for Flysystem",
     "license": "BSD-3-Clause",
     "keywords": [
         "silverstripe",
@@ -13,10 +13,6 @@
         {
             "name": "Matt Peel",
             "homepage": "https://github.com/madmatt/"
-        },
-        {
-            "name": "Joe Madden",
-            "homepage": "https://github.com/obj63mc/"
         }
     ],
     "require": {
