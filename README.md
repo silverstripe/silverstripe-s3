@@ -52,31 +52,24 @@ both public and protected files. Protected files will be streamed from AWS, so t
 not need to be accessed by users directly. Therefore, something similar to the following
 bucket policy may be useful.
 
-Make sure you replace `<bucket-name>` and `<your-ARN>` below with the appropriate values.
-`<your-ARN>` should match the IAM arn of the ec2 instance running your SilverStripe site.
+Make sure you replace `<bucket-name>` below with the appropriate values.
 
 **Note:** The below policy has not been extensively tested - feedback welcome.
 
 ```
 {
-    "Version": "2012-10-17",
-    "Id": "AccessForPublicAssetsAndPassthruForProtectedAssets",
-    "Statement": [
-        {
-            "Sid": "AllowAccessToPublicAssets",
-            "Effect": "Allow",
-            "Principal": "*",
-            "Action": "s3:GetObject",
-            "Resource": "arn:aws:s3:::<bucket-name>/public/*"
-        },
-        {
-            "Sid": "ServerFullAccess",
-            "Effect": "Allow",
-            "Principal": {"AWS":"<your-ARN>"},
-            "Action": ["s3:GetObject", "s3:DeleteObject", "s3:PutObject"],
-            "Resource": "arn:aws:s3:::<bucket-name>/*"
-        }
-    ]
+    "Policy": {
+		"Version":"2012-10-17,
+		"Statement":[
+			{
+				"Sid":"AddPerm",
+				"Effect":"Allow",
+				"Principal":"*",
+				"Action":"s3:GetObject",
+				"Resource":"arn:aws:s3:::<bucket-name>/public/*"
+			}
+		]
+	}
 }
 ```
 
