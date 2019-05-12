@@ -2,9 +2,9 @@
 
 SilverStripe module to store assets in S3 rather than on the local filesystem.
 
-Note: This is a pre-release module, and does not currently implement any kind of
-bucket policy for protected assets. It is up to you to implement this yourself
-using AWS bucket policy.
+Note: This module does not currently implement any kind of bucket policy for 
+protected assets. It is up to you to implement this yourself using AWS 
+bucket policy.
 
 ## Environment setup
 
