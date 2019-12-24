@@ -59,7 +59,7 @@ Make sure you replace `<bucket-name>` below with the appropriate values.
 ```
 {
     "Policy": {
-		"Version":"2012-10-17,
+		"Version":"2012-10-17",
 		"Statement":[
 			{
 				"Sid":"AddPerm",
