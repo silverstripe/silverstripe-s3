@@ -9,12 +9,13 @@ use SilverStripe\Assets\Flysystem\PublicAdapter as SilverstripePublicAdapter;
 
 class PublicAdapter extends AwsS3Adapter implements SilverstripePublicAdapter
 {
-    public function __construct(S3Client $client, $bucket, $prefix = '', array $options = [])
+    public function __construct(S3Client $client, $bucket, $prefix = null, array $options = [])
     {
         if (!$bucket) {
             throw new InvalidArgumentException("AWS_BUCKET_NAME environment variable not set");
         }
-        if (!$prefix) {
+        if ($prefix === null) {
+            // prefix can be an empty but needs to be set (not null)
             $prefix = 'public';
         }
         parent::__construct($client, $bucket, $prefix, $options);
