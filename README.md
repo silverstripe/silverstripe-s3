@@ -37,6 +37,27 @@ If running outside of an EC2 instance it will be necessary to specify an API key
 				key: '`AWS_ACCESS_KEY_ID`'
 				secret: '`AWS_SECRET_ACCESS_KEY`'
 
+## (Optional) CDN Implementation
+
+If you're serving assets from S3, it's recommended that you utilise CloudFront. This improves performance and security over exposing from S3 directly.
+
+Once you've set up your CloudFront distribution, ensure that assets are reachable within the `assets` directory of the cdn (for example; https://cdn.example.com/assets/Uploads/file.jpg) and set the following environment variable:
+
+* `AWS_PUBLIC_CDN_PREFIX`: Your CloudFront distribution domain that has access to the bucket you want to access
+
+For example, adding this to your `.env`:
+
+`AWS_PUBLIC_CDN_PREFIX='https://cdn.example.com/'`
+
+will change your URLs from something like:
+
+`https://s3.ap-southeast-2.amazonaws.com/mycdn/public/example/live/assets/Uploads/file.jpg`
+
+to something like:
+
+`https://cdn.example.com/assets/Uploads/file.jpg`
+
+ 
 ## Installation
 
 * Define the environment variables listed above.
@@ -90,6 +111,8 @@ Make sure you replace `<bucket-name>` below with the appropriate values.
 	}
 }
 ```
+
+If you are utilising a CloudFront distribution for your public assets, you will have the option of securing your S3 bucket against all public access while still allowing access to your `public` files via your CloudFront distribution and access to your `protected` files via signed URLs.
 
 ## Uninstalling
 
