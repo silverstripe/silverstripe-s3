@@ -20,22 +20,23 @@ If running outside of an EC2 instance it will be necessary to specify an API key
 * `AWS_SECRET_ACCESS_KEY`: Your AWS secret corresponding to the access key
 
 **Example YML Config when running outside of EC2:**
-
-		---
-		Only:
-		envvarset: AWS_BUCKET_NAME
-		After:
-		- '#assetsflysystem'
-		---
-		SilverStripe\Core\Injector\Injector:
-		Aws\S3\S3Client:
-			constructor:
-			configuration:
-				region: '`AWS_REGION`'
-				version: latest
-				credentials:
-				key: '`AWS_ACCESS_KEY_ID`'
-				secret: '`AWS_SECRET_ACCESS_KEY`'
+```yml
+---
+Only:
+envvarset: AWS_BUCKET_NAME
+After:
+- '#assetsflysystem'
+---
+SilverStripe\Core\Injector\Injector:
+Aws\S3\S3Client:
+  constructor:
+    configuration:
+      region: '`AWS_REGION`'
+      version: latest
+      credentials:
+        key: '`AWS_ACCESS_KEY_ID`'
+        secret: '`AWS_SECRET_ACCESS_KEY`'
+```
 
 ## Installation
 
@@ -74,7 +75,7 @@ Make sure you replace `<bucket-name>` below with the appropriate values.
 
 **Note:** The below policy has not been extensively tested - feedback welcome.
 
-```
+```json
 {
     "Policy": {
 		"Version":"2012-10-17",
@@ -90,6 +91,10 @@ Make sure you replace `<bucket-name>` below with the appropriate values.
 	}
 }
 ```
+
+## For developers
+
+Read [Setting up a local sandbox for developing the Silverstripe S3 module](doc/en/setting-local-dev-environment.md) if you wish to do some local development.
 
 ## Uninstalling
 
