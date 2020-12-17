@@ -13,11 +13,11 @@ use const ASSETS_DIR;
  */
 class PublicCDNAdapter extends PublicAdapter implements SilverstripePublicAdapter
 {
-    protected $CDNPrefix;
+    protected $cdnPrefix;
 
     public function __construct(S3Client $client, $bucket, $prefix = '', $cdnPrefix, array $options = [])
     {
-        $this->CDNPrefix = $cdnPrefix;
+        $this->cdnPrefix = $cdnPrefix;
         parent::__construct($client, $bucket, $prefix, $options);
     }
 
@@ -28,6 +28,6 @@ class PublicCDNAdapter extends PublicAdapter implements SilverstripePublicAdapte
      */
     public function getPublicUrl($path)
     {
-        return Controller::join_links($this->CDNPrefix, ASSETS_DIR, $path);
+        return Controller::join_links($this->cdnPrefix, ASSETS_DIR, $path);
     }
 }
