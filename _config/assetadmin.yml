@@ -8,3 +8,8 @@ SilverStripe\AssetAdmin\Model\ThumbnailGenerator:
   thumbnail_links:
     protected: url
     public: url
+
+# Asset-admin adds a `vid` parameter to preview URLs by default.
+# This confuses the AWS signature for protected assets, so we disable it.
+SilverStripe\AssetAdmin\Controller\AssetAdmin:
+  bust_cache: false
