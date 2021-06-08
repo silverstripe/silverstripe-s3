@@ -20,22 +20,23 @@ If running outside of an EC2 instance it will be necessary to specify an API key
 * `AWS_SECRET_ACCESS_KEY`: Your AWS secret corresponding to the access key
 
 **Example YML Config when running outside of EC2:**
+
 ```yml
 ---
 Only:
-envvarset: AWS_BUCKET_NAME
+  envvarset: AWS_BUCKET_NAME
 After:
-- '#assetsflysystem'
+  - '#assetsflysystem'
 ---
 SilverStripe\Core\Injector\Injector:
-Aws\S3\S3Client:
-  constructor:
-    configuration:
-      region: '`AWS_REGION`'
-      version: latest
-      credentials:
-        key: '`AWS_ACCESS_KEY_ID`'
-        secret: '`AWS_SECRET_ACCESS_KEY`'
+  Aws\S3\S3Client:
+    constructor:
+      configuration:
+        region: '`AWS_REGION`'
+        version: latest
+        credentials:
+          key: '`AWS_ACCESS_KEY_ID`'
+          secret: '`AWS_SECRET_ACCESS_KEY`'
 ```
 
 ## Installation
