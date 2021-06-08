@@ -76,7 +76,7 @@ Make sure you replace `<bucket-name>` below with the appropriate values.
 
 **Note:** The below policy has not been extensively tested - feedback welcome.
 
-```
+```json
 {
     "Policy": {
 		"Version":"2012-10-17",
@@ -92,6 +92,10 @@ Make sure you replace `<bucket-name>` below with the appropriate values.
 	}
 }
 ```
+
+## For developers
+
+Read [Setting up a local sandbox for developing the Silverstripe S3 module](doc/en/setting-local-dev-environment.md) if you wish to do some local development.
 
 ## Uninstalling
 
