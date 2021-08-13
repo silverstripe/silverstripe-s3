@@ -1,4 +1,5 @@
 ---
+Name: silverstripes3-tinymce
 After:
   - '#corehtml'
 ---
