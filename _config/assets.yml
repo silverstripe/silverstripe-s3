@@ -16,11 +16,6 @@ SilverStripe\Core\Injector\Injector:
     constructor:
       root: '`TEMP_PATH`'
 
-  SilverStripe\S3\Adapter\PublicAdapter:
-    constructor:
-      s3Client: '%$Aws\S3\S3Client'
-      bucket: '`AWS_BUCKET_NAME`'
-      prefix: '`AWS_PUBLIC_BUCKET_PREFIX`'
   League\Flysystem\Cached\Storage\Memory.public:
     class: League\Flysystem\Cached\Storage\Memory
   League\Flysystem\Cached\Storage\Adapter.public:
@@ -30,27 +25,24 @@ SilverStripe\Core\Injector\Injector:
       file: 's3metadata/public'
       expire: 259200
   SilverStripe\Assets\Flysystem\PublicAdapter:
-    class: SilverStripe\S3\Adapter\PublicCachedAdapter
+    class: SilverStripe\S3\Adapter\PublicAdapter
     constructor:
-      adapter: '%$SilverStripe\S3\Adapter\PublicAdapter'
-      cache: '%$League\Flysystem\Cached\Storage\Adapter.public'
+      s3Client: '%$Aws\S3\S3Client'
+      bucket: '`AWS_BUCKET_NAME`'
+      prefix: '`AWS_PUBLIC_BUCKET_PREFIX`'
 
-  SilverStripe\S3\Adapter\ProtectedAdapter:
+  League\Flysystem\Cached\Storage\Adapter.protected:
+    class: League\Flysystem\Cached\Storage\Adapter
+    constructor:
+      adapter: '%$League\Flysystem\Adapter\Local'
+      file: 's3metadata/protected'
+      expire: 259200
+  SilverStripe\Assets\Flysystem\ProtectedAdapter:
+    class: SilverStripe\S3\Adapter\ProtectedAdapter
     constructor:
       s3Client: '%$Aws\S3\S3Client'
       bucket: '`AWS_BUCKET_NAME`'
       prefix: '`AWS_PROTECTED_BUCKET_PREFIX`'
-  League\Flysystem\Cached\Storage\Adapter.protected:
-      class: League\Flysystem\Cached\Storage\Adapter
-      constructor:
-        adapter: '%$League\Flysystem\Adapter\Local'
-        file: 's3metadata/protected'
-        expire: 259200
-  SilverStripe\Assets\Flysystem\ProtectedAdapter:
-    class: SilverStripe\S3\Adapter\ProtectedCachedAdapter
-    constructor:
-      adapter: '%$SilverStripe\S3\Adapter\ProtectedAdapter'
-      cache: '%$League\Flysystem\Cached\Storage\Adapter.protected'
 #---
 Name: silverstripes3-assetscore
 Only:
