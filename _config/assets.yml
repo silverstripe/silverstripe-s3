@@ -41,7 +41,7 @@ SilverStripe\Core\Injector\Injector:
     constructor:
       adapter: '%$SilverStripe\S3\Adapter\ProtectedAdapter'
       cache: '%$League\Flysystem\Cached\Storage\Memory.protected'
-#---
+---
 Name: silverstripes3-assetscore
 Only:
   envvarset: AWS_BUCKET_NAME
@@ -52,3 +52,19 @@ SilverStripe\Core\Injector\Injector:
   # Define our SS asset backend
   SilverStripe\Assets\Storage\AssetStore:
     class: SilverStripe\Assets\Flysystem\FlysystemAssetStore
+---
+Name: silverstripes3-cdn
+Only:
+  envvarset: AWS_PUBLIC_CDN_PREFIX
+After:
+  - '#assetsflysystem'
+  - '#silverstripes3-flysystem'
+---
+SilverStripe\Core\Injector\Injector:
+  SilverStripe\S3\Adapter\PublicAdapter:
+    class: SilverStripe\S3\Adapter\PublicCDNAdapter
+    constructor:
+      s3Client: '%$Aws\S3\S3Client'
+      bucket: '`AWS_BUCKET_NAME`'
+      prefix: '`AWS_PUBLIC_BUCKET_PREFIX`'
+      cdnPrefix: '`AWS_PUBLIC_CDN_PREFIX`'
