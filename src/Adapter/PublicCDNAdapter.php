@@ -30,4 +30,12 @@ class PublicCDNAdapter extends PublicAdapter implements SilverstripePublicAdapte
     {
         return Controller::join_links($this->cdnPrefix, ASSETS_DIR, $path);
     }
+
+
+    public function setCdnPrefix(string $cdnPrefix): self
+    {
+        $this->cdnPrefix = $cdnPrefix;
+
+        return $this;
+    }
 }
