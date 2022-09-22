@@ -15,7 +15,7 @@ class PublicCDNAdapter extends PublicAdapter implements SilverstripePublicAdapte
 {
     protected $cdnPrefix;
 
-    public function __construct(S3Client $client, $bucket, $prefix = '', $cdnPrefix, array $options = [])
+    public function __construct(S3Client $client, $bucket, $prefix = '', $cdnPrefix = '', array $options = [])
     {
         $this->cdnPrefix = $cdnPrefix;
         parent::__construct($client, $bucket, $prefix, $options);
