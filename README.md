@@ -66,7 +66,7 @@ to something like:
 
 `https://cdn.example.com/assets/Uploads/file.jpg`
 
-You can override the default `/assets/` path by redeclaring the PublicCDNAdapter constructor, with the paramater for the `cdnAssetPath` set to a string of your folder name:
+You can override the default `/assets/` path by redeclaring the PublicCDNAdapter constructor, with the paramater for the `cdnAssetsDir` set to a string of your folder name:
 
 ```yml
 ---
@@ -85,7 +85,7 @@ SilverStripe\Core\Injector\Injector:
       bucket: "`AWS_BUCKET_NAME`"
       prefix: "`AWS_PUBLIC_BUCKET_PREFIX`"
       cdnPrefix: "`AWS_PUBLIC_CDN_PREFIX`"
-      cdnAssetPath: "public" # example of altered path name, which will produce https://cdn.example.com/public/Uploads/file.jpg
+      cdnAssetsDir: "cms-assets" # example of a custom assets folder name, which will produce https://cdn.example.com/cms-assets/Uploads/file.jpg
 ```
 
 ## Installation

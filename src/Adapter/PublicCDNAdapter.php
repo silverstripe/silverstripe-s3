@@ -16,12 +16,12 @@ class PublicCDNAdapter extends PublicAdapter implements SilverstripePublicAdapte
 {
     protected $cdnPrefix;
 
-    protected $cdnAssetPath;
+    protected $cdnAssetsDir;
 
-    public function __construct(S3Client $client, $bucket, $prefix = '', $cdnPrefix = '', $cdnAssetPath = '', array $options = [])
+    public function __construct(S3Client $client, $bucket, $prefix = '', $cdnPrefix = '', $cdnAssetsDir = '', array $options = [])
     {
         $this->cdnPrefix = $cdnPrefix;
-        $this->cdnAssetPath = $cdnAssetPath ? $cdnAssetPath : ASSETS_DIR;
+        $this->cdnAssetsDir = $cdnAssetsDir ? $cdnAssetsDir : ASSETS_DIR;
         parent::__construct($client, $bucket, $prefix, $options);
     }
 
@@ -32,7 +32,7 @@ class PublicCDNAdapter extends PublicAdapter implements SilverstripePublicAdapte
      */
     public function getPublicUrl($path)
     {
-        return Controller::join_links($this->cdnPrefix, $this->cdnAssetPath, $path);
+        return Controller::join_links($this->cdnPrefix, $this->cdnAssetsDir, $path);
     }
 
 
