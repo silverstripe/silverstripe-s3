@@ -18,7 +18,7 @@ class PublicCDNAdapter extends PublicAdapter implements SilverstripePublicAdapte
 
     protected $cdnAssetsDir;
 
-    public function __construct(S3Client $client, $bucket, $prefix = '', $cdnPrefix = '', $cdnAssetsDir = '', array $options = [])
+    public function __construct(S3Client $client, $bucket, $prefix = '', $cdnPrefix = '', array $options = [], $cdnAssetsDir = '')
     {
         $this->cdnPrefix = $cdnPrefix;
         $this->cdnAssetsDir = $cdnAssetsDir ? $cdnAssetsDir : ASSETS_DIR;
