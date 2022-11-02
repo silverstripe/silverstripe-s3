@@ -5,6 +5,7 @@ namespace SilverStripe\S3\Adapter;
 use Aws\S3\S3Client;
 use SilverStripe\Assets\Flysystem\PublicAdapter as SilverstripePublicAdapter;
 use SilverStripe\Control\Controller;
+
 use const ASSETS_DIR;
 
 /**
@@ -15,9 +16,12 @@ class PublicCDNAdapter extends PublicAdapter implements SilverstripePublicAdapte
 {
     protected $cdnPrefix;
 
-    public function __construct(S3Client $client, $bucket, $prefix = '', $cdnPrefix = '', array $options = [])
+    protected $cdnAssetsDir;
+
+    public function __construct(S3Client $client, $bucket, $prefix = '', $cdnPrefix = '', array $options = [], $cdnAssetsDir = '')
     {
         $this->cdnPrefix = $cdnPrefix;
+        $this->cdnAssetsDir = $cdnAssetsDir ? $cdnAssetsDir : ASSETS_DIR;
         parent::__construct($client, $bucket, $prefix, $options);
     }
 
@@ -28,7 +32,7 @@ class PublicCDNAdapter extends PublicAdapter implements SilverstripePublicAdapte
      */
     public function getPublicUrl($path)
     {
-        return Controller::join_links($this->cdnPrefix, ASSETS_DIR, $path);
+        return Controller::join_links($this->cdnPrefix, $this->cdnAssetsDir, $path);
     }
 
 

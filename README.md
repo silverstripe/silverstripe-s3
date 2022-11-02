@@ -11,15 +11,15 @@ policy.
 The module requires a few environment variables to be set. Full details can be
 seen in the `SilverStripeS3AdapterTrait` trait. These are mandatory.
 
-* `AWS_REGION`: The AWS region your S3 bucket is hosted in (e.g. `eu-central-1`)
-* `AWS_BUCKET_NAME`: The name of the S3 bucket to store assets in.
+- `AWS_REGION`: The AWS region your S3 bucket is hosted in (e.g. `eu-central-1`)
+- `AWS_BUCKET_NAME`: The name of the S3 bucket to store assets in.
 
 If running outside of an EC2 instance it will be necessary to specify an API key
 and secret.
 
-* `AWS_ACCESS_KEY_ID`: Your AWS access key that has access to the bucket you
+- `AWS_ACCESS_KEY_ID`: Your AWS access key that has access to the bucket you
   want to access
-* `AWS_SECRET_ACCESS_KEY`: Your AWS secret corresponding to the access key
+- `AWS_SECRET_ACCESS_KEY`: Your AWS secret corresponding to the access key
 
 **Example YML Config when running outside of EC2:**
 
@@ -28,20 +28,18 @@ and secret.
 Only:
   envvarset: AWS_BUCKET_NAME
 After:
-  - '#assetsflysystem'
+  - "#assetsflysystem"
 ---
 SilverStripe\Core\Injector\Injector:
   Aws\S3\S3Client:
     constructor:
       configuration:
-        region: '`AWS_REGION`'
+        region: "`AWS_REGION`"
         version: latest
         credentials:
-          key: '`AWS_ACCESS_KEY_ID`'
-          secret: '`AWS_SECRET_ACCESS_KEY`'
+          key: "`AWS_ACCESS_KEY_ID`"
+          secret: "`AWS_SECRET_ACCESS_KEY`"
 ```
-<<<<<<< HEAD
-=======
 
 ## (Optional) CDN Implementation
 
@@ -53,7 +51,7 @@ reachable within the `assets` directory of the cdn (for example;
 https://cdn.example.com/assets/Uploads/file.jpg) and set the following
 environment variable:
 
-* `AWS_PUBLIC_CDN_PREFIX`: Your CloudFront distribution domain that has access
+- `AWS_PUBLIC_CDN_PREFIX`: Your CloudFront distribution domain that has access
   to the bucket you want to access
 
 For example, adding this to your `.env`:
@@ -68,14 +66,35 @@ to something like:
 
 `https://cdn.example.com/assets/Uploads/file.jpg`
 
->>>>>>> rookie-me-feature/cdn_prefix
+You can override the default `/assets/` path by redeclaring the PublicCDNAdapter constructor, with the paramater for the `cdnAssetsDir` set to a string of your folder name:
+
+```yml
+---
+Name: silverstripes3-cdn
+Only:
+  envvarset: AWS_PUBLIC_CDN_PREFIX
+After:
+  - "#assetsflysystem"
+  - "#silverstripes3-flysystem"
+---
+SilverStripe\Core\Injector\Injector:
+  SilverStripe\S3\Adapter\PublicAdapter:
+    class: SilverStripe\S3\Adapter\PublicCDNAdapter
+    constructor:
+      s3Client: '%$Aws\S3\S3Client'
+      bucket: "`AWS_BUCKET_NAME`"
+      prefix: "`AWS_PUBLIC_BUCKET_PREFIX`"
+      cdnPrefix: "`AWS_PUBLIC_CDN_PREFIX`"
+      options: []
+      cdnAssetsDir: "cms-assets" # example of a custom assets folder name, which will produce https://cdn.example.com/cms-assets/Uploads/file.jpg
+```
 
 ## Installation
 
-* Define the environment variables listed above.
-* [Install Composer from
+- Define the environment variables listed above.
+- [Install Composer from
   https://getcomposer.org](https://getcomposer.org/download/)
-* Run `composer require silverstripe/s3`
+- Run `composer require silverstripe/s3`
 
 This will install the most recent applicable version of the module given your
 other Composer requirements.
@@ -111,18 +130,18 @@ Make sure you replace `<bucket-name>` below with the appropriate values.
 
 ```json
 {
-    "Policy": {
-		"Version":"2012-10-17",
-		"Statement":[
-			{
-				"Sid":"AddPerm",
-				"Effect":"Allow",
-				"Principal":"*",
-				"Action":"s3:GetObject",
-				"Resource":"arn:aws:s3:::<bucket-name>/public/*"
-			}
-		]
-	}
+  "Policy": {
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Sid": "AddPerm",
+        "Effect": "Allow",
+        "Principal": "*",
+        "Action": "s3:GetObject",
+        "Resource": "arn:aws:s3:::<bucket-name>/public/*"
+      }
+    ]
+  }
 }
 ```
 
@@ -139,4 +158,4 @@ development.
 
 ## Uninstalling
 
-* Run `composer remove silverstripe/s3` to remove the module.
+- Run `composer remove silverstripe/s3` to remove the module.
