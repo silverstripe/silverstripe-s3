@@ -16,7 +16,7 @@
         }
     ],
     "require": {
-        "silverstripe/framework": "^5",
+        "silverstripe/framework": "^4 || ^5",
         "league/flysystem-aws-s3-v3": "^1.0",
         "silverstripe/vendor-plugin": "^1 || ^2",
         "league/flysystem-cached-adapter": "^1.0"
