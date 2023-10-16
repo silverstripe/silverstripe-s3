@@ -60,7 +60,7 @@ class ProtectedAdapter extends AwsS3V3Adapter implements SilverstripeProtectedAd
      */
     public function getProtectedUrl($path)
     {
-        $cmd = $this->getClient()
+        $cmd = $this->client
             ->getCommand('GetObject', [
                 'Bucket' => $this->getBucket(),
                 'Key' => $this->applyPathPrefix($path),
@@ -72,7 +72,7 @@ class ProtectedAdapter extends AwsS3V3Adapter implements SilverstripeProtectedAd
             $expiry = "+{$expiry} seconds";
         }
 
-        return (string)$this->getClient()
+        return (string)$this->client
             ->createPresignedRequest($cmd, $expiry)
             ->getUri();
     }
