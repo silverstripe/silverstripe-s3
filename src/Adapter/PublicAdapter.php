@@ -6,6 +6,7 @@ use Aws\S3\S3Client;
 use InvalidArgumentException;
 use League\Flysystem\AwsS3V3\AwsS3V3Adapter;
 use League\Flysystem\AwsS3V3\VisibilityConverter;
+use League\Flysystem\Config;
 use League\MimeTypeDetection\MimeTypeDetector;
 use SilverStripe\Assets\Flysystem\PublicAdapter as SilverstripePublicAdapter;
 
@@ -29,6 +30,7 @@ class PublicAdapter extends AwsS3V3Adapter implements SilverstripePublicAdapter
      */
     public function getPublicUrl($path)
     {
-        return $this->getClient()->getObjectUrl($this->getBucket(), $this->applyPathPrefix($path));
+
+        return $this->publicUrl($path, new Config());
     }
 }
