@@ -5,6 +5,8 @@ namespace SilverStripe\S3\Adapter;
 use Aws\S3\S3Client;
 use InvalidArgumentException;
 use League\Flysystem\AwsS3V3\AwsS3V3Adapter;
+use League\Flysystem\AwsS3V3\VisibilityConverter;
+use League\MimeTypeDetection\MimeTypeDetector;
 use SilverStripe\Assets\Flysystem\ProtectedAdapter as SilverstripeProtectedAdapter;
 
 /**
@@ -19,7 +21,7 @@ class ProtectedAdapter extends AwsS3V3Adapter implements SilverstripeProtectedAd
      */
     protected $expiry = 300;
 
-    public function __construct(S3Client $client, $bucket, $prefix = '', array $options = [])
+    public function __construct(S3Client $client, $bucket, $prefix = '', VisibilityConverter $visibility = null, MimeTypeDetector $mimeTypeDetector = null, array $options = [])
     {
         if (!$bucket) {
             throw new InvalidArgumentException("AWS_BUCKET_NAME environment variable not set");
@@ -27,7 +29,7 @@ class ProtectedAdapter extends AwsS3V3Adapter implements SilverstripeProtectedAd
         if (!$prefix) {
             $prefix = 'protected';
         }
-        parent::__construct($client, $bucket, $prefix, $options);
+        parent::__construct($client, $bucket, $prefix, $visibility, $mimeTypeDetector, $options);
     }
 
     /**

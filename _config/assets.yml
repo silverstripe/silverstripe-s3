@@ -16,51 +16,72 @@ SilverStripe\Core\Injector\Injector:
     constructor:
       root: '`TEMP_PATH`'
 
-
   SilverStripe\S3\Adapter\PublicAdapter:
     constructor:
       s3Client: '%$Aws\S3\S3Client'
       bucket: '`AWS_BUCKET_NAME`'
       prefix: '`AWS_PUBLIC_BUCKET_PREFIX`'
-  League\Flysystem\Cached\Storage\Psr6Cache.public:
-    class: League\Flysystem\Cached\Storage\Psr6Cache
+  Symfony\Component\Cache\Adapter\FilesystemAdapter.public:
+    class: Symfony\Component\Cache\Adapter\FilesystemAdapter
     constructor:
-      pool: '%$Symfony\Component\Cache\Adapter\FilesystemAdapter'
-      key: 'flysystem-public'
+      namespace: 'flysystem-public'
       expire: 2592000
   SilverStripe\Assets\Flysystem\PublicAdapter:
     class: SilverStripe\S3\Adapter\PublicCachedAdapter
     constructor:
       adapter: '%$SilverStripe\S3\Adapter\PublicAdapter'
-      cache: '%$League\Flysystem\Cached\Storage\Psr6Cache.public'
+      cache: '%$Symfony\Component\Cache\Adapter\FilesystemAdapter.public'
+  League\Flysystem\Filesystem.public:
+    class: SilverStripe\Assets\Flysystem\Filesystem
+    constructor:
+      FilesystemAdapter: '%$SilverStripe\Assets\Flysystem\PublicAdapter'
+      FilesystemConfig:
+        visibility: public
 
   SilverStripe\S3\Adapter\ProtectedAdapter:
     constructor:
       s3Client: '%$Aws\S3\S3Client'
       bucket: '`AWS_BUCKET_NAME`'
       prefix: '`AWS_PROTECTED_BUCKET_PREFIX`'
-  League\Flysystem\Cached\Storage\Psr6Cache.protected:
-    class: League\Flysystem\Cached\Storage\Psr6Cache
+  Symfony\Component\Cache\Adapter\FilesystemAdapter.protected:
+    class: Symfony\Component\Cache\Adapter\FilesystemAdapter
     constructor:
-      pool: '%$Symfony\Component\Cache\Adapter\FilesystemAdapter'
-      key: 'flysystem-protected'
+      namespace: 'flysystem-protected'
       expire: 2592000
   SilverStripe\Assets\Flysystem\ProtectedAdapter:
     class: SilverStripe\S3\Adapter\ProtectedCachedAdapter
     constructor:
       adapter: '%$SilverStripe\S3\Adapter\ProtectedAdapter'
-      cache: '%$League\Flysystem\Cached\Storage\Psr6Cache.protected'
+      cache: '%$Symfony\Component\Cache\Adapter\FilesystemAdapter.protected'
+  League\Flysystem\Filesystem.protected:
+    class: SilverStripe\Assets\Flysystem\Filesystem
+    constructor:
+      FilesystemAdapter: '%$SilverStripe\Assets\Flysystem\ProtectedAdapter'
+      FilesystemConfig:
+        visibility: private
 ---
 Name: silverstripes3-assetscore
 Only:
   envvarset: AWS_BUCKET_NAME
 After:
+  - '#assetsflysystem'
   - '#assetscore'
 ---
 SilverStripe\Core\Injector\Injector:
   # Define our SS asset backend
   SilverStripe\Assets\Storage\AssetStore:
     class: SilverStripe\Assets\Flysystem\FlysystemAssetStore
+    properties:
+      PublicFilesystem: '%$League\Flysystem\Filesystem.public'
+      ProtectedFilesystem: '%$League\Flysystem\Filesystem.protected'
+  SilverStripe\Assets\Storage\GeneratedAssetHandler:
+    class: SilverStripe\Assets\Flysystem\GeneratedAssets
+    properties:
+      Filesystem: '%$League\Flysystem\Filesystem.public'
+  SilverStripe\View\Requirements_Backend:
+    properties:
+      AssetHandler: '%$SilverStripe\Assets\Storage\GeneratedAssetHandler'
+
 ---
 Name: silverstripes3-cdn
 Only:
