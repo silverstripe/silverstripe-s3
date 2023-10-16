@@ -6,6 +6,7 @@ use Aws\S3\S3Client;
 use InvalidArgumentException;
 use League\Flysystem\AwsS3V3\AwsS3V3Adapter;
 use League\Flysystem\AwsS3V3\VisibilityConverter;
+use League\Flysystem\Config;
 use League\MimeTypeDetection\MimeTypeDetector;
 use SilverStripe\Assets\Flysystem\ProtectedAdapter as SilverstripeProtectedAdapter;
 
@@ -60,21 +61,14 @@ class ProtectedAdapter extends AwsS3V3Adapter implements SilverstripeProtectedAd
      */
     public function getProtectedUrl($path)
     {
-        $cmd = $this->client
-            ->getCommand('GetObject', [
-                'Bucket' => $this->getBucket(),
-                'Key' => $this->applyPathPrefix($path),
-            ]);
-
-        // Format expiry
-        $expiry = $this->getExpiry();
-        if (is_numeric($expiry)) {
-            $expiry = "+{$expiry} seconds";
+        $dt = new \DateTime();
+        if(is_string($this->getExpiry())){
+            $dt = $dt->setTimestamp(strtotime($this->getExpiry()));
+        } else {
+            $dt = $dt->setTimestamp(strtotime('+'.$this->getExpiry().' seconds'));
         }
 
-        return (string)$this->client
-            ->createPresignedRequest($cmd, $expiry)
-            ->getUri();
+        return $this->temporaryUrl($path, $dt, new Config());
     }
 
     public function getVisibility($path)
