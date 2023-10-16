@@ -2,10 +2,10 @@
 
 namespace SilverStripe\S3\Adapter;
 
-use League\Flysystem\Cached\CachedAdapter;
 use SilverStripe\Assets\Flysystem\ProtectedAdapter;
+use jgivoni\Flysystem\Cache\CacheAdapter;
 
-class ProtectedCachedAdapter extends CachedAdapter implements ProtectedAdapter
+class ProtectedCachedAdapter extends CacheAdapter implements ProtectedAdapter
 {
     public function getProtectedUrl($path)
     {

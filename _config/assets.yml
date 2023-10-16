@@ -16,31 +16,40 @@ SilverStripe\Core\Injector\Injector:
     constructor:
       root: '`TEMP_PATH`'
 
+
   SilverStripe\S3\Adapter\PublicAdapter:
     constructor:
       s3Client: '%$Aws\S3\S3Client'
       bucket: '`AWS_BUCKET_NAME`'
       prefix: '`AWS_PUBLIC_BUCKET_PREFIX`'
-  League\Flysystem\Cached\Storage\Memory.public:
-    class: League\Flysystem\Cached\Storage\Memory
+  League\Flysystem\Cached\Storage\Psr6Cache.public:
+    class: League\Flysystem\Cached\Storage\Psr6Cache
+    constructor:
+      pool: '%$Symfony\Component\Cache\Adapter\FilesystemAdapter'
+      key: 'flysystem-public'
+      expire: 2592000
   SilverStripe\Assets\Flysystem\PublicAdapter:
     class: SilverStripe\S3\Adapter\PublicCachedAdapter
     constructor:
       adapter: '%$SilverStripe\S3\Adapter\PublicAdapter'
-      cache: '%$League\Flysystem\Cached\Storage\Memory.public'
+      cache: '%$League\Flysystem\Cached\Storage\Psr6Cache.public'
 
   SilverStripe\S3\Adapter\ProtectedAdapter:
     constructor:
       s3Client: '%$Aws\S3\S3Client'
       bucket: '`AWS_BUCKET_NAME`'
       prefix: '`AWS_PROTECTED_BUCKET_PREFIX`'
-  League\Flysystem\Cached\Storage\Memory.protected:
-    class: League\Flysystem\Cached\Storage\Memory
+  League\Flysystem\Cached\Storage\Psr6Cache.protected:
+    class: League\Flysystem\Cached\Storage\Psr6Cache
+    constructor:
+      pool: '%$Symfony\Component\Cache\Adapter\FilesystemAdapter'
+      key: 'flysystem-protected'
+      expire: 2592000
   SilverStripe\Assets\Flysystem\ProtectedAdapter:
     class: SilverStripe\S3\Adapter\ProtectedCachedAdapter
     constructor:
       adapter: '%$SilverStripe\S3\Adapter\ProtectedAdapter'
-      cache: '%$League\Flysystem\Cached\Storage\Memory.protected'
+      cache: '%$League\Flysystem\Cached\Storage\Psr6Cache.protected'
 ---
 Name: silverstripes3-assetscore
 Only:
