@@ -2,10 +2,9 @@
 
 namespace SilverStripe\S3\Adapter;
 
-use League\Flysystem\Cached\CachedAdapter;
 use SilverStripe\Assets\Flysystem\PublicAdapter;
 
-class PublicCachedAdapter extends CachedAdapter implements PublicAdapter
+class PublicCachedAdapter extends CacheAdapter implements PublicAdapter
 {
     public function getPublicUrl($path)
     {

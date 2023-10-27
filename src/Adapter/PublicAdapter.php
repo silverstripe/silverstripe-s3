@@ -4,12 +4,15 @@ namespace SilverStripe\S3\Adapter;
 
 use Aws\S3\S3Client;
 use InvalidArgumentException;
-use League\Flysystem\AwsS3v3\AwsS3Adapter;
+use League\Flysystem\AwsS3V3\AwsS3V3Adapter;
+use League\Flysystem\AwsS3V3\VisibilityConverter;
+use League\Flysystem\Config;
+use League\MimeTypeDetection\MimeTypeDetector;
 use SilverStripe\Assets\Flysystem\PublicAdapter as SilverstripePublicAdapter;
 
-class PublicAdapter extends AwsS3Adapter implements SilverstripePublicAdapter
+class PublicAdapter extends AwsS3V3Adapter implements SilverstripePublicAdapter
 {
-    public function __construct(S3Client $client, $bucket, $prefix = '', array $options = [])
+    public function __construct(S3Client $client, $bucket, $prefix = '', VisibilityConverter $visibility = null, MimeTypeDetector $mimeTypeDetector = null, array $options = [])
     {
         if (!$bucket) {
             throw new InvalidArgumentException("AWS_BUCKET_NAME environment variable not set");
@@ -17,7 +20,7 @@ class PublicAdapter extends AwsS3Adapter implements SilverstripePublicAdapter
         if (!$prefix) {
             $prefix = 'public';
         }
-        parent::__construct($client, $bucket, $prefix, $options);
+        parent::__construct($client, $bucket, $prefix, $visibility, $mimeTypeDetector, $options);
     }
 
     /**
@@ -27,6 +30,7 @@ class PublicAdapter extends AwsS3Adapter implements SilverstripePublicAdapter
      */
     public function getPublicUrl($path)
     {
-        return $this->getClient()->getObjectUrl($this->getBucket(), $this->applyPathPrefix($path));
+
+        return $this->publicUrl($path, new Config());
     }
 }

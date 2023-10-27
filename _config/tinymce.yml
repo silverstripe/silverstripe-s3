@@ -5,7 +5,7 @@ After:
 ---
 SilverStripe\Core\Injector\Injector:
   League\Flysystem\Filesystem.localpublic:
-    class: 'League\Flysystem\Filesystem'
+    class: 'SilverStripe\Assets\Flysystem\Filesystem'
     constructor:
       FilesystemAdapter: '%$SilverStripe\S3\Adapter\TinyMceAdapter'
       FilesystemConfig:

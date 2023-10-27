@@ -4,13 +4,16 @@ namespace SilverStripe\S3\Adapter;
 
 use Aws\S3\S3Client;
 use InvalidArgumentException;
-use League\Flysystem\AwsS3v3\AwsS3Adapter;
+use League\Flysystem\AwsS3V3\AwsS3V3Adapter;
+use League\Flysystem\AwsS3V3\VisibilityConverter;
+use League\Flysystem\Config;
+use League\MimeTypeDetection\MimeTypeDetector;
 use SilverStripe\Assets\Flysystem\ProtectedAdapter as SilverstripeProtectedAdapter;
 
 /**
  * An adapter that allows the use of AWS S3 to store and transmit assets rather than storing them locally.
  */
-class ProtectedAdapter extends AwsS3Adapter implements SilverstripeProtectedAdapter
+class ProtectedAdapter extends AwsS3V3Adapter implements SilverstripeProtectedAdapter
 {
     /**
      * Pre-signed request expiration time in seconds, or relative string
@@ -19,7 +22,7 @@ class ProtectedAdapter extends AwsS3Adapter implements SilverstripeProtectedAdap
      */
     protected $expiry = 300;
 
-    public function __construct(S3Client $client, $bucket, $prefix = '', array $options = [])
+    public function __construct(S3Client $client, $bucket, $prefix = '', VisibilityConverter $visibility = null, MimeTypeDetector $mimeTypeDetector = null, array $options = [])
     {
         if (!$bucket) {
             throw new InvalidArgumentException("AWS_BUCKET_NAME environment variable not set");
@@ -27,7 +30,7 @@ class ProtectedAdapter extends AwsS3Adapter implements SilverstripeProtectedAdap
         if (!$prefix) {
             $prefix = 'protected';
         }
-        parent::__construct($client, $bucket, $prefix, $options);
+        parent::__construct($client, $bucket, $prefix, $visibility, $mimeTypeDetector, $options);
     }
 
     /**
@@ -58,21 +61,14 @@ class ProtectedAdapter extends AwsS3Adapter implements SilverstripeProtectedAdap
      */
     public function getProtectedUrl($path)
     {
-        $cmd = $this->getClient()
-            ->getCommand('GetObject', [
-                'Bucket' => $this->getBucket(),
-                'Key' => $this->applyPathPrefix($path),
-            ]);
-
-        // Format expiry
-        $expiry = $this->getExpiry();
-        if (is_numeric($expiry)) {
-            $expiry = "+{$expiry} seconds";
+        $dt = new \DateTime();
+        if(is_string($this->getExpiry())){
+            $dt = $dt->setTimestamp(strtotime($this->getExpiry()));
+        } else {
+            $dt = $dt->setTimestamp(strtotime('+'.$this->getExpiry().' seconds'));
         }
 
-        return (string)$this->getClient()
-            ->createPresignedRequest($cmd, $expiry)
-            ->getUri();
+        return $this->temporaryUrl($path, $dt, new Config());
     }
 
     public function getVisibility($path)
