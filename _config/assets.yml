@@ -97,4 +97,6 @@ SilverStripe\Core\Injector\Injector:
       s3Client: '%$Aws\S3\S3Client'
       bucket: '`AWS_BUCKET_NAME`'
       prefix: '`AWS_PUBLIC_BUCKET_PREFIX`'
+      visibility: null
+      mimeTypeDetector: null
       cdnPrefix: '`AWS_PUBLIC_CDN_PREFIX`'
