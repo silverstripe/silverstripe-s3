@@ -82,9 +82,11 @@ SilverStripe\Core\Injector\Injector:
     class: SilverStripe\S3\Adapter\PublicCDNAdapter
     constructor:
       s3Client: '%$Aws\S3\S3Client'
-      bucket: "`AWS_BUCKET_NAME`"
-      prefix: "`AWS_PUBLIC_BUCKET_PREFIX`"
-      cdnPrefix: "`AWS_PUBLIC_CDN_PREFIX`"
+      bucket: '`AWS_BUCKET_NAME`'
+      prefix: '`AWS_PUBLIC_BUCKET_PREFIX`'
+      visibility: null
+      mimeTypeDetector: null
+      cdnPrefix: '`AWS_PUBLIC_CDN_PREFIX`'
       options: []
       cdnAssetsDir: "cms-assets" # example of a custom assets folder name, which will produce https://cdn.example.com/cms-assets/Uploads/file.jpg
 ```
