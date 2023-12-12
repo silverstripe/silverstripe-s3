@@ -3,6 +3,8 @@
 namespace SilverStripe\S3\Adapter;
 
 use Aws\S3\S3Client;
+use League\Flysystem\AwsS3V3\VisibilityConverter;
+use League\MimeTypeDetection\MimeTypeDetector;
 use SilverStripe\Assets\Flysystem\PublicAdapter as SilverstripePublicAdapter;
 use SilverStripe\Control\Controller;
 
