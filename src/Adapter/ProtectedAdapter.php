@@ -4,7 +4,6 @@ namespace SilverStripe\S3\Adapter;
 
 use Aws\S3\S3Client;
 use InvalidArgumentException;
-use League\Flysystem\AwsS3V3\AwsS3V3Adapter;
 use League\Flysystem\AwsS3V3\VisibilityConverter;
 use League\Flysystem\Config;
 use League\MimeTypeDetection\MimeTypeDetector;
@@ -13,7 +12,7 @@ use SilverStripe\Assets\Flysystem\ProtectedAdapter as SilverstripeProtectedAdapt
 /**
  * An adapter that allows the use of AWS S3 to store and transmit assets rather than storing them locally.
  */
-class ProtectedAdapter extends AwsS3V3Adapter implements SilverstripeProtectedAdapter
+class ProtectedAdapter extends CachedAwsS3V3Adapter implements SilverstripeProtectedAdapter
 {
     /**
      * Pre-signed request expiration time in seconds, or relative string
@@ -27,10 +26,14 @@ class ProtectedAdapter extends AwsS3V3Adapter implements SilverstripeProtectedAd
         if (!$bucket) {
             throw new InvalidArgumentException("AWS_BUCKET_NAME environment variable not set");
         }
+
         if (!$prefix) {
             $prefix = 'protected';
         }
+
         parent::__construct($client, $bucket, $prefix, $visibility, $mimeTypeDetector, $options);
+
+        $this->setCachePrefix('protected');
     }
 
     /**
@@ -40,6 +43,7 @@ class ProtectedAdapter extends AwsS3V3Adapter implements SilverstripeProtectedAd
     {
         return $this->expiry;
     }
+
 
     /**
      * Set expiry. Supports either number of seconds (in int) or
@@ -54,6 +58,7 @@ class ProtectedAdapter extends AwsS3V3Adapter implements SilverstripeProtectedAd
         return $this;
     }
 
+
     /**
      * @param string $path
      *
@@ -62,18 +67,12 @@ class ProtectedAdapter extends AwsS3V3Adapter implements SilverstripeProtectedAd
     public function getProtectedUrl($path)
     {
         $dt = new \DateTime();
-        if(is_string($this->getExpiry())){
+        if (is_string($this->getExpiry())) {
             $dt = $dt->setTimestamp(strtotime($this->getExpiry()));
         } else {
-            $dt = $dt->setTimestamp(strtotime('+'.$this->getExpiry().' seconds'));
+            $dt = $dt->setTimestamp(strtotime('+' . $this->getExpiry() . ' seconds'));
         }
 
         return $this->temporaryUrl($path, $dt, new Config());
-    }
-
-    public function getVisibility($path)
-    {
-        // Save an API call
-        return ['path' => $path, 'visibility' => self::VISIBILITY_PRIVATE];
     }
 }

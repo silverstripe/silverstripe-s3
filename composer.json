@@ -17,9 +17,8 @@
     ],
     "require": {
         "silverstripe/framework": "^5",
-        "league/flysystem-aws-s3-v3": "^3.0",
-        "silverstripe/vendor-plugin": "^2",
-        "jgivoni/flysystem-cache-adapter": "^3.0"
+        "league/flysystem-aws-s3-v3": "^3",
+        "silverstripe/vendor-plugin": "^2"
     },
     "autoload": {
         "psr-4": {
