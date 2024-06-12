@@ -5,9 +5,8 @@ namespace SilverStripe\S3\Adapter;
 use League\Flysystem\AwsS3V3\AwsS3V3Adapter;
 use League\Flysystem\CalculateChecksumFromStream;
 use League\Flysystem\ChecksumAlgoIsNotSupported;
-use League\Flysystem\FileAttributes;
-use Silverstripe\S3\Cache\CacheItemsTrait;
 use League\Flysystem\Config;
+use League\Flysystem\FileAttributes;
 use League\Flysystem\StorageAttributes;
 use League\Flysystem\UnableToCopyFile;
 use League\Flysystem\UnableToMoveFile;
@@ -16,14 +15,25 @@ use League\Flysystem\UnableToRetrieveMetadata;
 use League\Flysystem\UnableToSetVisibility;
 use Psr\SimpleCache\CacheInterface;
 use RuntimeException;
+use SilverStripe\Core\Config\Config as SSConfig;
+use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Core\Flushable;
 use SilverStripe\Core\Injector\Injector;
+use Silverstripe\S3\Cache\CacheItemsTrait;
 
 class CachedAwsS3V3Adapter extends AwsS3V3Adapter implements Flushable
 {
     use CacheItemsTrait;
     use CalculateChecksumFromStream;
+    use Configurable;
 
+    /**
+     * Is cache flushing enabled?
+     *
+     * @config
+     * @var boolean
+     */
+    private static $flush_enabled = true;
 
     /**
      * @inheritdoc
@@ -87,7 +97,7 @@ class CachedAwsS3V3Adapter extends AwsS3V3Adapter implements Flushable
         $url = parent::publicUrl($path, $config);
 
         if ($item) {
-            $state = self::mergeFileAttributes(
+            $state = CachedAwsS3V3Adapter::mergeFileAttributes(
                 fileAttributesBase: $item,
                 fileAttributesExtension: new FileAttributes(
                     path: $path,
@@ -142,7 +152,7 @@ class CachedAwsS3V3Adapter extends AwsS3V3Adapter implements Flushable
         }
 
         if (isset($item) && $item instanceof FileAttributes) {
-            $fileAttributes = self::mergeFileAttributes(
+            $fileAttributes = CachedAwsS3V3Adapter::mergeFileAttributes(
                 fileAttributesBase: $item,
                 fileAttributesExtension: new FileAttributes(
                     path: $path,
@@ -178,7 +188,7 @@ class CachedAwsS3V3Adapter extends AwsS3V3Adapter implements Flushable
         $item = $this->getCacheItem($path);
 
         if ($item && $item instanceof FileAttributes) {
-            $fileAttributes = self::mergeFileAttributes(
+            $fileAttributes = CachedAwsS3V3Adapter::mergeFileAttributes(
                 fileAttributesBase: $item,
                 fileAttributesExtension: new FileAttributes(
                     path: $path,
@@ -251,7 +261,7 @@ class CachedAwsS3V3Adapter extends AwsS3V3Adapter implements Flushable
         $attributes = $this->getCacheItem($path);
 
         if ($attributes) {
-            $attributes = self::mergeFileAttributes(
+            $attributes = CachedAwsS3V3Adapter::mergeFileAttributes(
                 fileAttributesBase: $attributes,
                 fileAttributesExtension: new FileAttributes(
                     path: $path,
@@ -424,6 +434,8 @@ class CachedAwsS3V3Adapter extends AwsS3V3Adapter implements Flushable
 
     public static function flush()
     {
-        Injector::inst()->get(CacheInterface::class . '.s3Cache')->clear();
+        if (SSConfig::inst()->get(static::class, 'flush_enabled')) {
+            Injector::inst()->get(CacheInterface::class . '.s3Cache')->clear();
+        }
     }
 }
