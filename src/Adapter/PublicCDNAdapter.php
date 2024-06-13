@@ -20,8 +20,16 @@ class PublicCDNAdapter extends PublicAdapter implements SilverstripePublicAdapte
 
     protected $cdnAssetsDir;
 
-    public function __construct(S3Client $client, $bucket, $prefix = '', VisibilityConverter $visibility = null, MimeTypeDetector $mimeTypeDetector = null, $cdnPrefix = '', array $options = [], $cdnAssetsDir = '')
-    {
+    public function __construct(
+        S3Client $client,
+        $bucket,
+        $prefix = '',
+        VisibilityConverter $visibility = null,
+        MimeTypeDetector $mimeTypeDetector = null,
+        $cdnPrefix = '',
+        array $options = [],
+        $cdnAssetsDir = ''
+    ) {
         $this->cdnPrefix = $cdnPrefix;
         $this->cdnAssetsDir = $cdnAssetsDir ? $cdnAssetsDir : ASSETS_DIR;
         parent::__construct($client, $bucket, $prefix, $visibility, $mimeTypeDetector, $options);

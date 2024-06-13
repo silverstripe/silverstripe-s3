@@ -3,74 +3,46 @@ Name: silverstripes3-flysystem
 Only:
   envvarset: AWS_BUCKET_NAME
 After:
-  - '#assetsflysystem'
+  - "#assetsflysystem"
 ---
 SilverStripe\Core\Injector\Injector:
   Aws\S3\S3Client:
     constructor:
       configuration:
-        region: '`AWS_REGION`'
+        region: "`AWS_REGION`"
         version: latest
+  Psr\SimpleCache\CacheInterface.s3Cache:
+    factory: SilverStripe\Core\Cache\CacheFactory
+    constructor:
+      namespace: "s3Cache"
   League\Flysystem\Adapter\Local:
     class: League\Flysystem\Adapter\Local
     constructor:
-      root: '`TEMP_PATH`'
-
-  SilverStripe\S3\Adapter\PublicAdapter:
-    constructor:
-      s3Client: '%$Aws\S3\S3Client'
-      bucket: '`AWS_BUCKET_NAME`'
-      prefix: '`AWS_PUBLIC_BUCKET_PREFIX`'
-  Symfony\Component\Cache\Adapter\FilesystemAdapter.public:
-    class: Symfony\Component\Cache\Adapter\FilesystemAdapter
-    constructor:
-      namespace: 'flysystem-public'
-      expire: 2592000
+      root: "`TEMP_PATH`"
   SilverStripe\Assets\Flysystem\PublicAdapter:
-    class: SilverStripe\S3\Adapter\PublicCachedAdapter
-    constructor:
-      adapter: '%$SilverStripe\S3\Adapter\PublicAdapter'
-      cache: '%$Symfony\Component\Cache\Adapter\FilesystemAdapter.public'
-  League\Flysystem\Filesystem.public:
-    class: SilverStripe\Assets\Flysystem\Filesystem
-    constructor:
-      FilesystemAdapter: '%$SilverStripe\Assets\Flysystem\PublicAdapter'
-      FilesystemConfig:
-        visibility: public
-
-  SilverStripe\S3\Adapter\ProtectedAdapter:
+    class: SilverStripe\S3\Adapter\PublicAdapter
     constructor:
       s3Client: '%$Aws\S3\S3Client'
-      bucket: '`AWS_BUCKET_NAME`'
-      prefix: '`AWS_PROTECTED_BUCKET_PREFIX`'
-  Symfony\Component\Cache\Adapter\FilesystemAdapter.protected:
-    class: Symfony\Component\Cache\Adapter\FilesystemAdapter
-    constructor:
-      namespace: 'flysystem-protected'
-      expire: 2592000
+      bucket: "`AWS_BUCKET_NAME`"
+      prefix: "`AWS_PUBLIC_BUCKET_PREFIX`"
   SilverStripe\Assets\Flysystem\ProtectedAdapter:
-    class: SilverStripe\S3\Adapter\ProtectedCachedAdapter
+    class: SilverStripe\S3\Adapter\ProtectedAdapter
     constructor:
-      adapter: '%$SilverStripe\S3\Adapter\ProtectedAdapter'
-      cache: '%$Symfony\Component\Cache\Adapter\FilesystemAdapter.protected'
-  League\Flysystem\Filesystem.protected:
-    class: SilverStripe\Assets\Flysystem\Filesystem
-    constructor:
-      FilesystemAdapter: '%$SilverStripe\Assets\Flysystem\ProtectedAdapter'
-      FilesystemConfig:
-        visibility: private
+      s3Client: '%$Aws\S3\S3Client'
+      bucket: "`AWS_BUCKET_NAME`"
+      prefix: "`AWS_PROTECTED_BUCKET_PREFIX`"
 ---
 Name: silverstripes3-assetscore
 Only:
   envvarset: AWS_BUCKET_NAME
 After:
-  - '#assetsflysystem'
-  - '#assetscore'
+  - "#assetsflysystem"
+  - "#assetscore"
 ---
 SilverStripe\Core\Injector\Injector:
   # Define our SS asset backend
   SilverStripe\Assets\Storage\AssetStore:
-    class: SilverStripe\Assets\Flysystem\FlysystemAssetStore
+    class: SilverStripe\S3\S3FlysystemAssetStore
     properties:
       PublicFilesystem: '%$League\Flysystem\Filesystem.public'
       ProtectedFilesystem: '%$League\Flysystem\Filesystem.protected'
@@ -81,22 +53,21 @@ SilverStripe\Core\Injector\Injector:
   SilverStripe\View\Requirements_Backend:
     properties:
       AssetHandler: '%$SilverStripe\Assets\Storage\GeneratedAssetHandler'
-
 ---
 Name: silverstripes3-cdn
 Only:
   envvarset: AWS_PUBLIC_CDN_PREFIX
 After:
-  - '#assetsflysystem'
-  - '#silverstripes3-flysystem'
+  - "#assetsflysystem"
+  - "#silverstripes3-flysystem"
 ---
 SilverStripe\Core\Injector\Injector:
   SilverStripe\S3\Adapter\PublicAdapter:
     class: SilverStripe\S3\Adapter\PublicCDNAdapter
     constructor:
       s3Client: '%$Aws\S3\S3Client'
-      bucket: '`AWS_BUCKET_NAME`'
-      prefix: '`AWS_PUBLIC_BUCKET_PREFIX`'
+      bucket: "`AWS_BUCKET_NAME`"
+      prefix: "`AWS_PUBLIC_BUCKET_PREFIX`"
       visibility: null
       mimeTypeDetector: null
-      cdnPrefix: '`AWS_PUBLIC_CDN_PREFIX`'
+      cdnPrefix: "`AWS_PUBLIC_CDN_PREFIX`"
