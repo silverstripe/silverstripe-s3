@@ -79,11 +79,11 @@ to something like:
 
 You can override the default `/assets/` path by declaring the PublicCDNAdapter
 constructor, with the parameter for the `cdnAssetsDir` set to a string of your
-folder name:
+folder name. In your `app/_config/assets.yml` file add the following:
 
 ```yml
 ---
-Name: silverstripes3-cdn
+Name: app#silverstripes3-cdn
 Only:
     envvarset: AWS_PUBLIC_CDN_PREFIX
 After:
