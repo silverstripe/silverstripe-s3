@@ -13,6 +13,7 @@ use League\Flysystem\UnableToMoveFile;
 use League\Flysystem\UnableToReadFile;
 use League\Flysystem\UnableToRetrieveMetadata;
 use League\Flysystem\UnableToSetVisibility;
+use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
 use RuntimeException;
 use SilverStripe\Core\Config\Config as SSConfig;
@@ -36,6 +37,22 @@ class CachedAwsS3V3Adapter extends AwsS3V3Adapter implements Flushable
     private static $flush_enabled = true;
 
     /**
+     * Is logging enabled?
+     *
+     * @config
+     * @var boolean
+     */
+    private static $logging_enabled = false;
+
+    /**
+     * Enablo local stream caching
+     *
+     * @config
+     * @var boolean
+     */
+    private static $local_streaming = true;
+
+    /**
      * @inheritdoc
      */
     public function fileExists(string $path): bool
@@ -48,7 +65,10 @@ class CachedAwsS3V3Adapter extends AwsS3V3Adapter implements Flushable
             return false;
         }
 
+        $startTime = microtime(true);
         $fileExists = parent::fileExists($path);
+
+        $this->logAwsCall(__FUNCTION__, $path, microtime(true) - $startTime);
 
         $state = new FileAttributes(
             path: $fileExists,
@@ -73,7 +93,11 @@ class CachedAwsS3V3Adapter extends AwsS3V3Adapter implements Flushable
             return false;
         }
 
+        $startTime = microtime(true);
+
         $directoryExists = parent::directoryExists($path);
+
+        $this->logAwsCall(__FUNCTION__, $path, microtime(true) - $startTime);
 
         $state = new FileAttributes(
             path: $path,
@@ -94,7 +118,11 @@ class CachedAwsS3V3Adapter extends AwsS3V3Adapter implements Flushable
             return $item->extraMetadata()['publicUrl'];
         }
 
+        $startTime = microtime(true);
+
         $url = parent::publicUrl($path, $config);
+
+        $this->logAwsCall(__FUNCTION__, $path, microtime(true) - $startTime);
 
         if ($item) {
             $state = CachedAwsS3V3Adapter::mergeFileAttributes(
@@ -142,8 +170,10 @@ class CachedAwsS3V3Adapter extends AwsS3V3Adapter implements Flushable
      */
     public function read(string $path): string
     {
+        $time = microtime(true);
         try {
             $contents = parent::read($path);
+
             $item = $this->getCacheItem($path);
         } catch (UnableToReadFile $e) {
             $this->purgeCachePath($path);
@@ -167,6 +197,8 @@ class CachedAwsS3V3Adapter extends AwsS3V3Adapter implements Flushable
             );
         }
 
+        $this->logAwsCall(__FUNCTION__, $path, microtime(true) - $time);
+
         $this->saveCacheItem($path, $fileAttributes);
 
         return $contents;
@@ -177,12 +209,29 @@ class CachedAwsS3V3Adapter extends AwsS3V3Adapter implements Flushable
      */
     public function readStream(string $path)
     {
-        try {
-            $resource = parent::readStream($path);
-        } catch (UnableToReadFile $e) {
-            $this->purgeCachePath($path);
+        $time = microtime(true);
+        $resource = false;
 
-            throw $e;
+        if ($this->config()->get('local_streaming')) {
+            // save the stream to a local file
+            $localPath = TEMP_PATH . '/s3__local__' . md5($path);
+
+            if (!file_exists($localPath)) {
+                $resource = parent::read($path);
+                file_put_contents($localPath, $resource);
+            } else {
+                $resource = fopen($localPath, 'r');
+            }
+        } else {
+            try {
+                $resource = parent::readStream($path);
+            } catch (UnableToReadFile $e) {
+                $this->purgeCachePath($path);
+
+                throw $e;
+            }
+
+            $this->logAwsCall(__FUNCTION__, $path, microtime(true) - $time);
         }
 
         $item = $this->getCacheItem($path);
@@ -304,11 +353,17 @@ class CachedAwsS3V3Adapter extends AwsS3V3Adapter implements Flushable
      */
     public function mimeType(string $path): FileAttributes
     {
+        $time = microtime(true);
+
         return $this->getFileAttributes(
             path: $path,
-            loader: function () use ($path) {
+            loader: function () use ($path, $time) {
                 try {
-                    return parent::mimeType($path);
+                    $type = parent::mimeType($path);
+
+                    $this->logAwsCall(__FUNCTION__, $path, microtime(true) - $time);
+
+                    return $type;
                 } catch (UnableToRetrieveMetadata $e) {
                     return new FileAttributes($path, null, null, null, '');
                 }
@@ -365,6 +420,8 @@ class CachedAwsS3V3Adapter extends AwsS3V3Adapter implements Flushable
      */
     public function checksum(string $path, Config $config): string
     {
+        $time = microtime(true);
+
         $algo = $config->get('checksum_algo');
         $metadataKey = isset($algo) ? 'checksum_' . $algo : 'checksum';
 
@@ -396,6 +453,8 @@ class CachedAwsS3V3Adapter extends AwsS3V3Adapter implements Flushable
         } catch (RuntimeException $e) {
             return '';
         }
+
+        $this->logAwsCall(__FUNCTION__, $path, microtime(true) - $time);
 
         return $attributeAccessor($fileAttributes);
     }
@@ -436,6 +495,18 @@ class CachedAwsS3V3Adapter extends AwsS3V3Adapter implements Flushable
     {
         if (SSConfig::inst()->get(static::class, 'flush_enabled')) {
             Injector::inst()->get(CacheInterface::class . '.s3Cache')->clear();
+        }
+    }
+
+
+    protected function logAwsCall(string $method, string $path, float $mircoseconds): void
+    {
+        if (SSConfig::inst()->get(static::class, 'logging_enabled')) {
+            $time = number_format($mircoseconds, 6);
+
+            Injector::inst()->get(LoggerInterface::class)->info(
+                sprintf('AWS S3 call: %s(%s) took %s seconds', $method, $path, $time)
+            );
         }
     }
 }
