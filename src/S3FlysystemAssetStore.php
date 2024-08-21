@@ -22,7 +22,7 @@ class S3FlysystemAssetStore extends BaseFlysystemAssetStore
      *
      * @var bool
      */
-    private static $check_legacy_path = false;
+    private static $check_legacy_path = true;
 
     /**
      * @config

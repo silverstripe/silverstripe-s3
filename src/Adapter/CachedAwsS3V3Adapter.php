@@ -2,6 +2,7 @@
 
 namespace SilverStripe\S3\Adapter;
 
+use Exception;
 use League\Flysystem\AwsS3V3\AwsS3V3Adapter;
 use League\Flysystem\CalculateChecksumFromStream;
 use League\Flysystem\ChecksumAlgoIsNotSupported;
@@ -48,7 +49,11 @@ class CachedAwsS3V3Adapter extends AwsS3V3Adapter implements Flushable
             return false;
         }
 
-        $fileExists = parent::fileExists($path);
+        try {
+            $fileExists = parent::fileExists($path);
+        } catch (Exception $e) {
+            $fileExists = false;
+        }
 
         $state = new FileAttributes(
             path: $fileExists,
@@ -73,7 +78,11 @@ class CachedAwsS3V3Adapter extends AwsS3V3Adapter implements Flushable
             return false;
         }
 
-        $directoryExists = parent::directoryExists($path);
+        try {
+            $directoryExists = parent::directoryExists($path);
+        } catch (Exception $e) {
+            $directoryExists = false;
+        }
 
         $state = new FileAttributes(
             path: $path,
