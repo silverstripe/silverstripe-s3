@@ -1,4 +1,12 @@
 ---
+Name: silverstripes3-flysystem-cache
+---
+SilverStripe\Core\Injector\Injector:
+  Psr\SimpleCache\CacheInterface.s3Cache:
+    factory: SilverStripe\Core\Cache\CacheFactory
+    constructor:
+      namespace: "s3Cache"
+---
 Name: silverstripes3-flysystem
 Only:
   envvarset: AWS_BUCKET_NAME
@@ -11,10 +19,6 @@ SilverStripe\Core\Injector\Injector:
       configuration:
         region: "`AWS_REGION`"
         version: latest
-  Psr\SimpleCache\CacheInterface.s3Cache:
-    factory: SilverStripe\Core\Cache\CacheFactory
-    constructor:
-      namespace: "s3Cache"
   League\Flysystem\Adapter\Local:
     class: League\Flysystem\Adapter\Local
     constructor:
