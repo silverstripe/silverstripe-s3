@@ -6,6 +6,7 @@ SilverStripe\Core\Injector\Injector:
     factory: SilverStripe\Core\Cache\CacheFactory
     constructor:
       namespace: "s3Cache"
+      disable-container: true
 ---
 Name: silverstripes3-flysystem
 Only:
