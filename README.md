@@ -91,7 +91,7 @@ After:
     - "#silverstripes3-flysystem"
 ---
 SilverStripe\Core\Injector\Injector:
-    SilverStripe\S3\Adapter\PublicAdapter:
+    SilverStripe\Assets\Flysystem\PublicAdapter:
         class: SilverStripe\S3\Adapter\PublicCDNAdapter
         constructor:
             s3Client: '%$Aws\S3\S3Client'
