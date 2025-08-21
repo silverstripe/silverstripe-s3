@@ -17,8 +17,7 @@
     ],
     "require": {
         "silverstripe/framework": "^5",
-        "league/flysystem-aws-s3-v3": "^3",
-        "silverstripe/vendor-plugin": "^2"
+        "league/flysystem-aws-s3-v3": "^3"
     },
     "autoload": {
         "psr-4": {
@@ -26,5 +25,12 @@
         }
     },
     "minimum-stability": "dev",
-    "prefer-stable": true
+    "prefer-stable": true,
+    "config": {
+        "allow-plugins": {
+            "composer/installers": true,
+            "silverstripe/vendor-plugin": true,
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    }
 }
