@@ -3,31 +3,43 @@
 namespace Silverstripe\S3\Tasks;
 
 use SilverStripe\Dev\BuildTask;
+use SilverStripe\PolyExecution\PolyOutput;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 
 class S3DebugAsset extends BuildTask
 {
-    protected $title = 'S3 Debug Asset';
+    protected string $title = 'S3 Debug Asset';
 
-    private static $segment = 'S3DebugAsset';
+    protected static string $commandName = 'S3DebugAsset';
 
-    protected $description = 'Debug S3 Asset';
+    protected static string $description = 'Debug S3 Asset';
 
-    public function run($request)
+    protected function execute(InputInterface $input, PolyOutput $output) :int
     {
-        $fileId = $request->getVar('fileId');
+        $fileId = $input->getOption('fileId');
 
         if (!$fileId) {
             echo 'Please provide fileId';
-            return;
+            return Command::INVALID;
         }
 
-        $file = \SilverStripe\Assets\File::get()->byId($fileId);
+        $file = \SilverStripe\Assets\File::get()->byID($fileId);
 
         if (!$file) {
             echo 'File not found';
-            return;
+            return Command::FAILURE;
         }
 
-        var_dump($file->getAbsoluteURL());
+        $output->writeln($file->getAbsoluteURL());
+        return Command::SUCCESS;
+    }
+
+    public function getOptions(): array
+    {
+        return [
+            new InputOption('fileId', null, InputOption::VALUE_REQUIRED, 'provide the file ID to test grabbing the files URL'),
+        ];
     }
 }
