@@ -24,8 +24,8 @@ class PublicCDNAdapter extends PublicAdapter implements SilverstripePublicAdapte
         S3Client $client,
         $bucket,
         $prefix = '',
-        VisibilityConverter $visibility = null,
-        MimeTypeDetector $mimeTypeDetector = null,
+        ?VisibilityConverter $visibility = null,
+        ?MimeTypeDetector $mimeTypeDetector = null,
         $cdnPrefix = '',
         array $options = [],
         $cdnAssetsDir = ''

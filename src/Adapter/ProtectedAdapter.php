@@ -21,7 +21,7 @@ class ProtectedAdapter extends CachedAwsS3V3Adapter implements SilverstripeProte
      */
     protected $expiry = 300;
 
-    public function __construct(S3Client $client, $bucket, $prefix = '', VisibilityConverter $visibility = null, MimeTypeDetector $mimeTypeDetector = null, array $options = [])
+    public function __construct(S3Client $client, $bucket, $prefix = '', ?VisibilityConverter $visibility = null, ?MimeTypeDetector $mimeTypeDetector = null, array $options = [])
     {
         if (!$bucket) {
             throw new InvalidArgumentException("AWS_BUCKET_NAME environment variable not set");
