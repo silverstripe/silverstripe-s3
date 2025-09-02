@@ -33,6 +33,6 @@ class PublicAdapter extends CachedAwsS3V3Adapter implements SilverstripePublicAd
     public function getPublicUrl($path)
     {
 
-        return $this->temporaryUrl($path, new \DateTime('+1 hour'), new Config());
+        return $this->publicUrl($path, new Config());
     }
 }
