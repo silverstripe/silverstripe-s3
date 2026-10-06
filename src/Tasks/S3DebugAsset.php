@@ -1,6 +1,6 @@
 <?php
 
-namespace Silverstripe\S3\Tasks;
+namespace SilverStripe\S3\Tasks;
 
 use SilverStripe\Dev\BuildTask;
 use SilverStripe\PolyExecution\PolyOutput;
