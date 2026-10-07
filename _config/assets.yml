@@ -43,6 +43,8 @@ Only:
 After:
   - "#assetsflysystem"
   - "#assetscore"
+  - "#assetscache"
+  - "#assetsimage"
 ---
 SilverStripe\Core\Injector\Injector:
   # Define our SS asset backend
@@ -51,6 +53,11 @@ SilverStripe\Core\Injector\Injector:
     properties:
       PublicFilesystem: '%$League\Flysystem\Filesystem.public'
       ProtectedFilesystem: '%$League\Flysystem\Filesystem.protected'
+  # Read file hashes and image dimensions from S3 object metadata instead of downloading the file
+  SilverStripe\Assets\Storage\FileHashingService:
+    class: SilverStripe\S3\S3FileHashingService
+  SilverStripe\Assets\Image_Backend:
+    class: SilverStripe\S3\S3InterventionBackend
   SilverStripe\Assets\Storage\GeneratedAssetHandler:
     class: SilverStripe\Assets\Flysystem\GeneratedAssets
     properties:

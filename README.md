@@ -193,6 +193,53 @@ SilverStripe\Core\Injector\Injector:
     SilverStripe\Core\Cache\CacheFactory: "%$MemcachedCacheFactory"
 ```
 
+### File hashes and image dimensions
+
+Silverstripe checks the SHA1 hash of a file when resolving its URL, and reads
+the dimensions of an image when rendering it. With an empty cache that would
+mean downloading the file from S3, so this module stores both as metadata on
+each object as it is written (`sha1`, plus `width` and `height` for images) and
+reads them back with a `HEAD` request instead.
+
+Files uploaded before this was introduced are given their metadata the first
+time their hash or dimensions are needed: the object is downloaded once, as it
+always was, and then copied onto itself with the metadata added, keeping its
+content type, cache control and visibility. Nothing needs to be run for this.
+If requests shouldn't write to the bucket, turn it off, and such files are
+simply downloaded to be hashed or measured as before:
+
+```yaml
+SilverStripe\S3\Adapter\CachedAwsS3V3Adapter:
+  lazy_metadata_backfill: false
+```
+
+To update every file up front instead of as they are used, run the backfill
+task.
+
+```sh
+# See what would change
+vendor/bin/sake tasks:S3BackfillMetadata --dry-run
+
+# Try it on one folder first
+vendor/bin/sake tasks:S3BackfillMetadata --path=Uploads --limit=10
+
+# Everything
+vendor/bin/sake tasks:S3BackfillMetadata
+```
+
+The task can be stopped and re-run, as objects which already have a hash are
+skipped. Use `--force` to recalculate them. On a versioned bucket each updated
+object gains a new version.
+
+Photos which EXIF says are on their side (typically portrait phone photos) are
+stored with the size in the file plus an `orientation` value, and the width and
+height are swapped when read if the image manager has `autoOrientation` on. This
+needs the PHP `exif` extension; without it JPEGs are not given dimensions and are
+measured from the image as before.
+
+Files given metadata by an earlier version of this feature only gain their
+dimensions when the task is run with `--force`.
+
 ## Uninstalling
 
 Run `composer remove silverstripe/s3` to remove the module.

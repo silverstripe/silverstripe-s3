@@ -1,6 +1,6 @@
 <?php
 
-namespace Silverstripe\S3\Cache;
+namespace SilverStripe\S3\Cache;
 
 use Closure;
 use League\Flysystem\FileAttributes;
