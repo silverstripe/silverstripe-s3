@@ -1,6 +1,6 @@
 <?php
 
-namespace Silverstripe\S3;
+namespace SilverStripe\S3;
 
 use Exception;
 use SilverStripe\Assets\FilenameParsing\FileResolutionStrategy;
@@ -8,6 +8,7 @@ use SilverStripe\Assets\FilenameParsing\ParsedFileID;
 use SilverStripe\Assets\Flysystem\Filesystem;
 use SilverStripe\Assets\Flysystem\FlysystemAssetStore as BaseFlysystemAssetStore;
 use SilverStripe\Assets\Storage\AssetStore;
+use SilverStripe\S3\Adapter\CachedAwsS3V3Adapter;
 
 class S3FlysystemAssetStore extends BaseFlysystemAssetStore
 {
@@ -178,6 +179,26 @@ class S3FlysystemAssetStore extends BaseFlysystemAssetStore
         $publicAdapter = $public->getAdapter();
 
         return $publicAdapter->getPublicUrl($fileID);
+    }
+
+
+    /**
+     * Get the S3 user metadata stored on the object for the given file or variant
+     *
+     * @return array<string,string> Empty if the file can't be found or has no metadata
+     */
+    public function getObjectMetadata($filename, $hash, $variant = null): array
+    {
+        return $this->applyToFileOnFilesystem(
+            function (ParsedFileID $parsedFileID, Filesystem $fs) {
+                $adapter = $fs->getAdapter();
+
+                return $adapter instanceof CachedAwsS3V3Adapter
+                    ? $adapter->getObjectMetadata($parsedFileID->getFileID())
+                    : [];
+            },
+            new ParsedFileID($filename, $hash, $variant)
+        ) ?: [];
     }
 
 
