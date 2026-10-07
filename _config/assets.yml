@@ -83,3 +83,13 @@ SilverStripe\Core\Injector\Injector:
       visibility: null
       mimeTypeDetector: null
       cdnPrefix: "`AWS_PUBLIC_CDN_PREFIX`"
+---
+Name: silverstripes3-cdn-imageeditor
+Only:
+  envvarset: AWS_PUBLIC_CDN_PREFIX
+  classexists: SilverStripe\AssetAdmin\Model\ImageEditor
+---
+# Give edited images a new filename, as the CDN would keep serving the cached image from the old one
+SilverStripe\AssetAdmin\Model\ImageEditor:
+  extensions:
+    - SilverStripe\S3\Extensions\ImageEditorExtension

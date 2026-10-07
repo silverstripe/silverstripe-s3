@@ -7,7 +7,9 @@ use SilverStripe\Assets\FilenameParsing\FileResolutionStrategy;
 use SilverStripe\Assets\FilenameParsing\ParsedFileID;
 use SilverStripe\Assets\Flysystem\Filesystem;
 use SilverStripe\Assets\Flysystem\FlysystemAssetStore as BaseFlysystemAssetStore;
+use SilverStripe\Assets\File;
 use SilverStripe\Assets\Storage\AssetStore;
+use SilverStripe\Versioned\Versioned;
 use SilverStripe\S3\Adapter\CachedAwsS3V3Adapter;
 
 class S3FlysystemAssetStore extends BaseFlysystemAssetStore
@@ -54,7 +56,9 @@ class S3FlysystemAssetStore extends BaseFlysystemAssetStore
         ];
 
 
-        foreach ([$publicSet, $protectedSet] as $set) {
+        // Protected first, as its file IDs include the hash. A public file ID does not, so a
+        // draft asset would otherwise be mistaken for the published file of the same name.
+        foreach ([$protectedSet, $publicSet] as $set) {
             try {
                 list($fs, $strategy, $visibility) = $set;
 
@@ -217,6 +221,42 @@ class S3FlysystemAssetStore extends BaseFlysystemAssetStore
         }
 
         return AssetStore::VISIBILITY_PROTECTED;
+    }
+
+
+    /**
+     * Whether a file in the given stage uses this asset. Core accounts for the other stage of the
+     * file it is writing, but not for another file sharing the asset (see ImageEditorExtension).
+     */
+    protected function isUsedInStage($filename, $hash, $stage)
+    {
+        return Versioned::get_by_stage(File::class, $stage)
+            ->filter(['FileFilename' => $filename, 'FileHash' => $hash])
+            ->exists();
+    }
+
+
+    public function delete($filename, $hash)
+    {
+        $otherStage = Versioned::get_stage() === Versioned::LIVE ? Versioned::DRAFT : Versioned::LIVE;
+        if ($this->isUsedInStage($filename, $hash, $otherStage)) {
+            return false;
+        }
+
+        return parent::delete($filename, $hash);
+    }
+
+
+    public function protect($filename, $hash)
+    {
+        // A draft file must not take a published file's asset out of the public store
+        if (Versioned::get_stage() === Versioned::DRAFT
+            && $this->isUsedInStage($filename, $hash, Versioned::LIVE)
+        ) {
+            return;
+        }
+
+        parent::protect($filename, $hash);
     }
 
 
