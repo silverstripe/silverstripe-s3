@@ -104,6 +104,19 @@ SilverStripe\Core\Injector\Injector:
             cdnAssetsDir: "cms-assets" # example of a custom assets folder name
 ```
 
+### Editing images with a CDN
+
+The image editor added in Silverstripe CMS 6.3 replaces an image under its existing filename. As
+the URL would not change, your CDN would keep serving the cached image from before the edit.
+
+When `AWS_PUBLIC_CDN_PREFIX` is set, this module does not overwrite a published image. The edited
+image is added to your bucket under a new versioned filename and used instead, so `bird.jpg` becomes
+`bird-v2.jpg`.
+
+If you choose to back up the original image, the backup keeps the name `bird.jpg` and uses the
+original file where it is, so no copy is made and its URL keeps working. Without a backup, the
+original file is removed when you publish the edit.
+
 ## Configuration
 
 Assets are classed as either 'public' or 'protected' by SilverStripe. Public
